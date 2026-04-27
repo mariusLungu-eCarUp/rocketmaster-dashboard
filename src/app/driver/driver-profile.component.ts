@@ -12,27 +12,27 @@ import { License } from '../store/models';
   template: `
     <div class="flex flex-col gap-5 p-5 pb-10" style="max-width: 1200px">
       @if (!user()) {
-        <div class="text-center py-16" style="color: #64748B">
+        <div class="text-center py-16" style="color: #3B566B">
           <p class="text-sm">User not found</p>
-          <button class="text-sm font-medium mt-2 cursor-pointer" style="color: #1275E2" (click)="goBack()">Back to Dashboard</button>
+          <button class="text-sm font-medium mt-2 cursor-pointer" style="color: #03A9F4" (click)="goBack()">Back to Dashboard</button>
         </div>
       } @else {
         <!-- Header card -->
-        <div class="bg-white" style="border: 1px solid #E2E8F0; border-left: 3px solid #1275E2; border-radius: 6px; padding: 16px 20px">
+        <div class="bg-white" style="border: 1px solid #E2E8F0; border-left: 3px solid #03A9F4; border-radius: 6px; padding: 16px 20px">
           <div class="flex items-start justify-between gap-4">
             <div>
               <div class="flex items-center gap-3 mb-1">
-                <span class="text-xl font-bold font-mono" style="color: #0F172A">{{ user()!.Identification || user()!.Id }}</span>
+                <span class="font-mono" style="color: #000000; font-size: 22px; font-weight: 500; line-height: 30px">{{ user()!.Identification || user()!.Id }}</span>
                 <span class="text-xs font-semibold px-2.5 py-0.5 rounded-full"
-                  [style.color]="user()!.VerificationStatus === 'Verified' ? '#059669' : '#64748B'"
+                  [style.color]="user()!.VerificationStatus === 'Verified' ? '#059669' : '#3B566B'"
                   [style.background]="user()!.VerificationStatus === 'Verified' ? '#ECFDF5' : '#F1F5F9'"
                   [style.border]="'1px solid ' + (user()!.VerificationStatus === 'Verified' ? '#6EE7B7' : '#E2E8F0')">
                   {{ user()!.VerificationStatus || 'Unknown' }}
                 </span>
               </div>
               <div class="flex gap-4 flex-wrap mt-1">
-                <span class="text-xs" style="color: #64748B">ID: {{ user()!.Id }}</span>
-                <span class="text-xs" style="color: #64748B">Email: {{ user()!.AnonymizedEmail || '—' }}</span>
+                <span class="text-xs" style="color: #3B566B">ID: {{ user()!.Id }}</span>
+                <span class="text-xs" style="color: #3B566B">Email: {{ user()!.AnonymizedEmail || '—' }}</span>
                 @if (user()!.LicenseCoverage) {
                   <span class="text-xs font-medium"
                     [style.color]="user()!.LicenseCoverage.Status?.toLowerCase() === 'exceeded' ? '#DC2626' : '#059669'">
@@ -43,7 +43,7 @@ import { License } from '../store/models';
               @if (user()!.Features?.length) {
                 <div class="flex gap-1.5 flex-wrap mt-2">
                   @for (f of user()!.Features; track f.Type) {
-                    <span class="text-xs px-2 py-0.5 rounded" style="background: #F1F5F9; color: #64748B; border: 1px solid #E2E8F0">{{ f.Type }}</span>
+                    <span class="text-xs px-2 py-0.5 rounded" style="background: #F1F5F9; color: #3B566B; border: 1px solid #E2E8F0">{{ f.Type }}</span>
                   }
                 </div>
               }
@@ -60,26 +60,26 @@ import { License } from '../store/models';
         <!-- Active Sessions -->
         <div class="bg-white" style="border: 1px solid #E2E8F0; border-radius: 6px; padding: 16px 20px">
           <div class="flex items-center justify-between mb-3">
-            <span class="text-xs font-semibold uppercase tracking-wider" style="color: #64748B">Active Sessions</span>
-            <span class="text-xs" style="color: #64748B">{{ activeSessions().length }} session(s)</span>
+            <span class="text-xs font-semibold uppercase tracking-wider" style="color: #3B566B">Active Sessions</span>
+            <span class="text-xs" style="color: #3B566B">{{ activeSessions().length }} session(s)</span>
           </div>
           @if (activeSessions().length === 0) {
-            <p class="text-xs text-center py-4" style="color: #64748B">No active sessions</p>
+            <p class="text-xs text-center py-4" style="color: #3B566B">No active sessions</p>
           } @else {
             <div class="overflow-x-auto">
               <table class="w-full" style="border-collapse: collapse">
                 <thead>
-                  <tr style="background: #F8FAFC">
-                    <th class="text-left text-xs font-semibold uppercase tracking-wider px-3 py-2" style="color: #64748B; border-bottom: 1px solid #E2E8F0">Station</th>
-                    <th class="text-left text-xs font-semibold uppercase tracking-wider px-3 py-2" style="color: #64748B; border-bottom: 1px solid #E2E8F0">Started</th>
-                    <th class="text-left text-xs font-semibold uppercase tracking-wider px-3 py-2" style="color: #64748B; border-bottom: 1px solid #E2E8F0">Duration</th>
-                    <th class="text-right text-xs font-semibold uppercase tracking-wider px-3 py-2" style="color: #64748B; border-bottom: 1px solid #E2E8F0">Action</th>
+                  <tr style="background: #F4F4F4">
+                    <th class="text-left text-xs font-semibold uppercase tracking-wider px-3 py-2" style="color: #3B566B; border-bottom: 1px solid #E2E8F0">Station</th>
+                    <th class="text-left text-xs font-semibold uppercase tracking-wider px-3 py-2" style="color: #3B566B; border-bottom: 1px solid #E2E8F0">Started</th>
+                    <th class="text-left text-xs font-semibold uppercase tracking-wider px-3 py-2" style="color: #3B566B; border-bottom: 1px solid #E2E8F0">Duration</th>
+                    <th class="text-right text-xs font-semibold uppercase tracking-wider px-3 py-2" style="color: #3B566B; border-bottom: 1px solid #E2E8F0">Action</th>
                   </tr>
                 </thead>
                 <tbody>
                   @for (s of activeSessions(); track s.Id) {
                     <tr class="hover:bg-blue-50/50">
-                      <td class="px-3 py-2 text-sm cursor-pointer" style="border-bottom: 1px solid #E2E8F0; color: #1275E2" (click)="goToStation(s.StationId)">{{ s.StationName || s.StationId }}</td>
+                      <td class="px-3 py-2 text-sm cursor-pointer" style="border-bottom: 1px solid #E2E8F0; color: #03A9F4" (click)="goToStation(s.StationId)">{{ s.StationName || s.StationId }}</td>
                       <td class="px-3 py-2 text-sm" style="border-bottom: 1px solid #E2E8F0">{{ s.ActivatedAt }}</td>
                       <td class="px-3 py-2 text-sm" style="border-bottom: 1px solid #E2E8F0">{{ s.Duration }}</td>
                       <td class="px-3 py-2 text-right" style="border-bottom: 1px solid #E2E8F0">
@@ -97,22 +97,22 @@ import { License } from '../store/models';
         <!-- Licenses -->
         <div class="bg-white" style="border: 1px solid #E2E8F0; border-radius: 6px; padding: 16px 20px">
           <div class="flex items-center justify-between mb-3">
-            <span class="text-xs font-semibold uppercase tracking-wider" style="color: #64748B">Licenses</span>
+            <span class="text-xs font-semibold uppercase tracking-wider" style="color: #3B566B">Licenses</span>
           </div>
           @if (licensesLoading()) {
-            <p class="text-xs text-center py-4" style="color: #64748B">Loading...</p>
+            <p class="text-xs text-center py-4" style="color: #3B566B">Loading...</p>
           } @else if (licenses().length === 0) {
-            <p class="text-xs text-center py-4" style="color: #64748B">No licenses</p>
+            <p class="text-xs text-center py-4" style="color: #3B566B">No licenses</p>
           } @else {
             <div class="overflow-x-auto">
               <table class="w-full" style="border-collapse: collapse">
                 <thead>
-                  <tr style="background: #F8FAFC">
-                    <th class="text-left text-xs font-semibold uppercase tracking-wider px-3 py-2" style="color: #64748B; border-bottom: 1px solid #E2E8F0">Tier</th>
-                    <th class="text-left text-xs font-semibold uppercase tracking-wider px-3 py-2" style="color: #64748B; border-bottom: 1px solid #E2E8F0">Qty</th>
-                    <th class="text-left text-xs font-semibold uppercase tracking-wider px-3 py-2" style="color: #64748B; border-bottom: 1px solid #E2E8F0">Start</th>
-                    <th class="text-left text-xs font-semibold uppercase tracking-wider px-3 py-2" style="color: #64748B; border-bottom: 1px solid #E2E8F0">End</th>
-                    <th class="text-left text-xs font-semibold uppercase tracking-wider px-3 py-2" style="color: #64748B; border-bottom: 1px solid #E2E8F0">Status</th>
+                  <tr style="background: #F4F4F4">
+                    <th class="text-left text-xs font-semibold uppercase tracking-wider px-3 py-2" style="color: #3B566B; border-bottom: 1px solid #E2E8F0">Tier</th>
+                    <th class="text-left text-xs font-semibold uppercase tracking-wider px-3 py-2" style="color: #3B566B; border-bottom: 1px solid #E2E8F0">Qty</th>
+                    <th class="text-left text-xs font-semibold uppercase tracking-wider px-3 py-2" style="color: #3B566B; border-bottom: 1px solid #E2E8F0">Start</th>
+                    <th class="text-left text-xs font-semibold uppercase tracking-wider px-3 py-2" style="color: #3B566B; border-bottom: 1px solid #E2E8F0">End</th>
+                    <th class="text-left text-xs font-semibold uppercase tracking-wider px-3 py-2" style="color: #3B566B; border-bottom: 1px solid #E2E8F0">Status</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -124,7 +124,7 @@ import { License } from '../store/models';
                       <td class="px-3 py-2 text-sm" style="border-bottom: 1px solid #E2E8F0">{{ formatDate(l.EndDate) }}</td>
                       <td class="px-3 py-2" style="border-bottom: 1px solid #E2E8F0">
                         <span class="text-xs font-semibold px-2 py-0.5 rounded-full"
-                          [style.color]="isLicenseActive(l) ? '#059669' : '#64748B'"
+                          [style.color]="isLicenseActive(l) ? '#059669' : '#3B566B'"
                           [style.background]="isLicenseActive(l) ? '#ECFDF5' : '#F1F5F9'">
                           {{ isLicenseActive(l) ? 'Active' : 'Expired' }}
                         </span>
@@ -139,18 +139,18 @@ import { License } from '../store/models';
 
         <!-- RFID Cards -->
         <div class="bg-white" style="border: 1px solid #E2E8F0; border-radius: 6px; padding: 16px 20px">
-          <span class="text-xs font-semibold uppercase tracking-wider" style="color: #64748B">RFID Cards</span>
+          <span class="text-xs font-semibold uppercase tracking-wider" style="color: #3B566B">RFID Cards</span>
           @if (rfidCards().length === 0) {
-            <p class="text-xs text-center py-4" style="color: #64748B">No RFID cards</p>
+            <p class="text-xs text-center py-4" style="color: #3B566B">No RFID cards</p>
           } @else {
             <div class="overflow-x-auto mt-3">
               <table class="w-full" style="border-collapse: collapse">
                 <thead>
-                  <tr style="background: #F8FAFC">
-                    <th class="text-left text-xs font-semibold uppercase tracking-wider px-3 py-2" style="color: #64748B; border-bottom: 1px solid #E2E8F0">ID</th>
-                    <th class="text-left text-xs font-semibold uppercase tracking-wider px-3 py-2" style="color: #64748B; border-bottom: 1px solid #E2E8F0">Name</th>
-                    <th class="text-left text-xs font-semibold uppercase tracking-wider px-3 py-2" style="color: #64748B; border-bottom: 1px solid #E2E8F0">Valid Until</th>
-                    <th class="text-right text-xs font-semibold uppercase tracking-wider px-3 py-2" style="color: #64748B; border-bottom: 1px solid #E2E8F0">Action</th>
+                  <tr style="background: #F4F4F4">
+                    <th class="text-left text-xs font-semibold uppercase tracking-wider px-3 py-2" style="color: #3B566B; border-bottom: 1px solid #E2E8F0">ID</th>
+                    <th class="text-left text-xs font-semibold uppercase tracking-wider px-3 py-2" style="color: #3B566B; border-bottom: 1px solid #E2E8F0">Name</th>
+                    <th class="text-left text-xs font-semibold uppercase tracking-wider px-3 py-2" style="color: #3B566B; border-bottom: 1px solid #E2E8F0">Valid Until</th>
+                    <th class="text-right text-xs font-semibold uppercase tracking-wider px-3 py-2" style="color: #3B566B; border-bottom: 1px solid #E2E8F0">Action</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -173,18 +173,18 @@ import { License } from '../store/models';
 
         <!-- Car IDs -->
         <div class="bg-white" style="border: 1px solid #E2E8F0; border-radius: 6px; padding: 16px 20px">
-          <span class="text-xs font-semibold uppercase tracking-wider" style="color: #64748B">Car IDs</span>
+          <span class="text-xs font-semibold uppercase tracking-wider" style="color: #3B566B">Car IDs</span>
           @if (carIds().length === 0) {
-            <p class="text-xs text-center py-4" style="color: #64748B">No car IDs</p>
+            <p class="text-xs text-center py-4" style="color: #3B566B">No car IDs</p>
           } @else {
             <div class="overflow-x-auto mt-3">
               <table class="w-full" style="border-collapse: collapse">
                 <thead>
-                  <tr style="background: #F8FAFC">
-                    <th class="text-left text-xs font-semibold uppercase tracking-wider px-3 py-2" style="color: #64748B; border-bottom: 1px solid #E2E8F0">ID</th>
-                    <th class="text-left text-xs font-semibold uppercase tracking-wider px-3 py-2" style="color: #64748B; border-bottom: 1px solid #E2E8F0">Name</th>
-                    <th class="text-left text-xs font-semibold uppercase tracking-wider px-3 py-2" style="color: #64748B; border-bottom: 1px solid #E2E8F0">Valid Until</th>
-                    <th class="text-right text-xs font-semibold uppercase tracking-wider px-3 py-2" style="color: #64748B; border-bottom: 1px solid #E2E8F0">Action</th>
+                  <tr style="background: #F4F4F4">
+                    <th class="text-left text-xs font-semibold uppercase tracking-wider px-3 py-2" style="color: #3B566B; border-bottom: 1px solid #E2E8F0">ID</th>
+                    <th class="text-left text-xs font-semibold uppercase tracking-wider px-3 py-2" style="color: #3B566B; border-bottom: 1px solid #E2E8F0">Name</th>
+                    <th class="text-left text-xs font-semibold uppercase tracking-wider px-3 py-2" style="color: #3B566B; border-bottom: 1px solid #E2E8F0">Valid Until</th>
+                    <th class="text-right text-xs font-semibold uppercase tracking-wider px-3 py-2" style="color: #3B566B; border-bottom: 1px solid #E2E8F0">Action</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -207,17 +207,17 @@ import { License } from '../store/models';
 
         <!-- Permissions -->
         <div class="bg-white" style="border: 1px solid #E2E8F0; border-radius: 6px; padding: 16px 20px">
-          <span class="text-xs font-semibold uppercase tracking-wider" style="color: #64748B">Permissions</span>
+          <span class="text-xs font-semibold uppercase tracking-wider" style="color: #3B566B">Permissions</span>
           @if (permissions().length === 0) {
-            <p class="text-xs text-center py-4" style="color: #64748B">No permissions</p>
+            <p class="text-xs text-center py-4" style="color: #3B566B">No permissions</p>
           } @else {
             <div class="overflow-x-auto mt-3">
               <table class="w-full" style="border-collapse: collapse">
                 <thead>
-                  <tr style="background: #F8FAFC">
-                    <th class="text-left text-xs font-semibold uppercase tracking-wider px-3 py-2" style="color: #64748B; border-bottom: 1px solid #E2E8F0">Type</th>
-                    <th class="text-left text-xs font-semibold uppercase tracking-wider px-3 py-2" style="color: #64748B; border-bottom: 1px solid #E2E8F0">Target Type</th>
-                    <th class="text-left text-xs font-semibold uppercase tracking-wider px-3 py-2" style="color: #64748B; border-bottom: 1px solid #E2E8F0">Target ID</th>
+                  <tr style="background: #F4F4F4">
+                    <th class="text-left text-xs font-semibold uppercase tracking-wider px-3 py-2" style="color: #3B566B; border-bottom: 1px solid #E2E8F0">Type</th>
+                    <th class="text-left text-xs font-semibold uppercase tracking-wider px-3 py-2" style="color: #3B566B; border-bottom: 1px solid #E2E8F0">Target Type</th>
+                    <th class="text-left text-xs font-semibold uppercase tracking-wider px-3 py-2" style="color: #3B566B; border-bottom: 1px solid #E2E8F0">Target ID</th>
                   </tr>
                 </thead>
                 <tbody>

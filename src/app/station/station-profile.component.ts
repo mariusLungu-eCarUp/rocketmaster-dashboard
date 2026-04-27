@@ -3,6 +3,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { SupportDataStore } from '../store/support-data.store';
 import { StatusBadgeComponent } from '../shared/status-badge.component';
 import { ConfirmDialogComponent } from '../shared/confirm-dialog.component';
+import { IconComponent } from '../shared/icon.component';
 import {
   AdminConnectorDto,
   AdminStationDto,
@@ -20,15 +21,15 @@ import {
 
 @Component({
   selector: 'app-station-profile',
-  imports: [StatusBadgeComponent, ConfirmDialogComponent],
+  imports: [StatusBadgeComponent, ConfirmDialogComponent, IconComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   encapsulation: ViewEncapsulation.None,
   template: `
     <div class="flex flex-col gap-5 p-5 pb-10" style="max-width: 1200px">
       @if (!station()) {
-        <div class="text-center py-16" style="color: #64748B">
+        <div class="text-center py-16" style="color: #3B566B">
           <p class="text-sm">Station not found</p>
-          <button class="text-sm font-medium mt-2 cursor-pointer" style="color: #1275E2" (click)="goBack()">Back to Dashboard</button>
+          <button class="text-sm font-medium mt-2 cursor-pointer" style="color: #03A9F4" (click)="goBack()">Back to Dashboard</button>
         </div>
       } @else {
         <!-- Header card -->
@@ -37,28 +38,28 @@ import {
           <div class="flex items-start justify-between gap-4">
             <div>
               <div class="flex items-center gap-3 mb-1">
-                <span class="text-xl font-bold font-mono" style="color: #0F172A">{{ station()!.Name || station()!.Id }}</span>
+                <span class="font-mono" style="color: #000000; font-size: 22px; font-weight: 500; line-height: 30px">{{ station()!.Name || station()!.Id }}</span>
                 <app-status-badge [state]="overallState()" />
               </div>
               <div class="flex gap-4 flex-wrap mt-1">
-                <span class="flex items-center gap-1 text-xs" style="color: #64748B">
-                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#64748B" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M17.657 16.657L13.414 20.9a2 2 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" /></svg>
+                <span class="flex items-center gap-1 text-xs" style="color: #3B566B">
+                  <app-icon name="map-pin" [size]="12" color="#3B566B" />
                   {{ station()!.Address || 'No address' }}
                 </span>
-                <span class="flex items-center gap-1 text-xs cursor-pointer" style="color: #1275E2" (click)="goToOwner()">
-                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2M12 11a4 4 0 100-8 4 4 0 000 8z" /></svg>
+                <span class="flex items-center gap-1 text-xs cursor-pointer" style="color: #03A9F4" (click)="goToOwner()">
+                  <app-icon name="user" [size]="12" />
                   Owner: {{ station()!.UserId }}
                 </span>
-                <span class="text-xs" style="color: #64748B">{{ typeLabel() }} / {{ subtypeLabel() }}</span>
+                <span class="text-xs" style="color: #3B566B">{{ typeLabel() }} / {{ subtypeLabel() }}</span>
               </div>
             </div>
 
             <!-- Actions -->
             <div class="flex gap-2 flex-wrap shrink-0">
               <button class="flex items-center gap-1.5 text-xs font-medium px-3 py-1.5 rounded-md cursor-pointer"
-                style="color: #5F78A3; border: 1px solid #E2E8F0"
+                style="color: #3B566B; border: 1px solid #E2E8F0"
                 (click)="softReset()">
-                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4v5h5M20 20v-5h-5M4 9a9 9 0 0114.9-3.4M19 15a9 9 0 01-14.9 3.4" /></svg>
+                <app-icon name="rotate-ccw" [size]="13" />
                 Soft Reset
               </button>
               <button class="flex items-center gap-1.5 text-xs font-medium px-3 py-1.5 rounded-md cursor-pointer"
@@ -68,7 +69,7 @@ import {
               </button>
               @for (conn of station()!.Connectors; track conn.Position) {
                 <button class="flex items-center gap-1.5 text-xs font-medium px-3 py-1.5 rounded-md cursor-pointer"
-                  style="color: #1275E2; border: 1px solid #BFDBFE; background: #EFF6FF"
+                  style="color: #03A9F4; border: 1px solid #B3E5FC; background: #E1F5FE"
                   (click)="unlockConnector(conn.Position)">
                   Unlock C{{ conn.Position }}
                 </button>
@@ -81,7 +82,7 @@ import {
           <!-- Left: Connectors -->
           <div class="flex flex-col gap-5">
             <div class="bg-white" style="border: 1px solid #E2E8F0; border-radius: 6px; padding: 16px 20px">
-              <div class="text-xs font-semibold uppercase tracking-wider mb-3" style="color: #64748B; letter-spacing: 0.07em">Connectors</div>
+              <div class="text-xs font-semibold uppercase tracking-wider mb-3" style="color: #3B566B; letter-spacing: 0.07em">Connectors</div>
               <div class="flex flex-col gap-2">
                 @for (conn of station()!.Connectors; track conn.Position) {
                   <div class="flex items-center justify-between gap-3 p-3 rounded-md"
@@ -92,13 +93,11 @@ import {
                       <div class="flex items-center justify-center shrink-0"
                         style="width: 32px; height: 32px; border-radius: 4px"
                         [style.background]="connIconBg(conn)">
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" [attr.stroke]="connAccentColor(conn)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-                          <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" />
-                        </svg>
+                        <app-icon name="zap" [size]="14" [color]="connAccentColor(conn)" />
                       </div>
                       <div>
-                        <div class="text-sm font-semibold" style="color: #0F172A">C{{ conn.Position }} &mdash; {{ plugLabel(conn.PlugType) }}</div>
-                        <div class="text-xs mt-0.5" style="color: #64748B">{{ accessLabel(conn.AccessType) }} &middot; {{ conn.EnergyPrice }} {{ conn.Currency }}/kWh</div>
+                        <div class="text-sm font-semibold" style="color: #000000">C{{ conn.Position }} &mdash; {{ plugLabel(conn.PlugType) }}</div>
+                        <div class="text-xs mt-0.5" style="color: #3B566B">{{ accessLabel(conn.AccessType) }} &middot; {{ conn.EnergyPrice }} {{ conn.Currency }}/kWh</div>
                       </div>
                     </div>
                     @if (conn.State !== undefined && conn.State !== null) {
@@ -107,7 +106,7 @@ import {
                   </div>
                 }
                 @if (!station()!.Connectors || station()!.Connectors.length === 0) {
-                  <p class="text-xs py-4 text-center" style="color: #64748B">No connectors</p>
+                  <p class="text-xs py-4 text-center" style="color: #3B566B">No connectors</p>
                 }
               </div>
             </div>
@@ -115,11 +114,11 @@ import {
 
           <!-- Right: Hardware Details -->
           <div class="bg-white" style="border: 1px solid #E2E8F0; border-radius: 6px; padding: 16px 20px">
-            <div class="text-xs font-semibold uppercase tracking-wider mb-3" style="color: #64748B; letter-spacing: 0.07em">Hardware Details</div>
+            <div class="text-xs font-semibold uppercase tracking-wider mb-3" style="color: #3B566B; letter-spacing: 0.07em">Hardware Details</div>
             @for (row of hardwareRows(); track row.label) {
               <div class="flex justify-between py-1.5" style="border-bottom: 1px solid #E2E8F0">
-                <span class="text-xs font-medium uppercase tracking-wider" style="color: #64748B; letter-spacing: 0.05em">{{ row.label }}</span>
-                <span class="text-xs font-mono" style="color: #0F172A">{{ row.value }}</span>
+                <span class="text-xs font-medium uppercase tracking-wider" style="color: #3B566B; letter-spacing: 0.05em">{{ row.label }}</span>
+                <span class="text-xs font-mono" style="color: #000000">{{ row.value }}</span>
               </div>
             }
           </div>
@@ -128,26 +127,26 @@ import {
         <!-- Active Sessions -->
         <div class="bg-white" style="border: 1px solid #E2E8F0; border-radius: 6px; padding: 16px 20px">
           <div class="flex items-center justify-between mb-3">
-            <span class="text-xs font-semibold uppercase tracking-wider" style="color: #64748B">Active Sessions</span>
-            <span class="text-xs" style="color: #64748B">{{ activeSessions().length }} session(s)</span>
+            <span class="text-xs font-semibold uppercase tracking-wider" style="color: #3B566B">Active Sessions</span>
+            <span class="text-xs" style="color: #3B566B">{{ activeSessions().length }} session(s)</span>
           </div>
           @if (activeSessions().length === 0) {
-            <p class="text-xs text-center py-4" style="color: #64748B">No active sessions</p>
+            <p class="text-xs text-center py-4" style="color: #3B566B">No active sessions</p>
           } @else {
             <div class="overflow-x-auto">
               <table class="w-full" style="border-collapse: collapse">
                 <thead>
-                  <tr style="background: #F8FAFC">
-                    <th class="text-left text-xs font-semibold uppercase tracking-wider px-3 py-2 whitespace-nowrap" style="color: #64748B; border-bottom: 1px solid #E2E8F0">Driver</th>
-                    <th class="text-left text-xs font-semibold uppercase tracking-wider px-3 py-2 whitespace-nowrap" style="color: #64748B; border-bottom: 1px solid #E2E8F0">Started</th>
-                    <th class="text-left text-xs font-semibold uppercase tracking-wider px-3 py-2 whitespace-nowrap" style="color: #64748B; border-bottom: 1px solid #E2E8F0">Duration</th>
-                    <th class="text-right text-xs font-semibold uppercase tracking-wider px-3 py-2 whitespace-nowrap" style="color: #64748B; border-bottom: 1px solid #E2E8F0">Action</th>
+                  <tr style="background: #F4F4F4">
+                    <th class="text-left text-xs font-semibold uppercase tracking-wider px-3 py-2 whitespace-nowrap" style="color: #3B566B; border-bottom: 1px solid #E2E8F0">Driver</th>
+                    <th class="text-left text-xs font-semibold uppercase tracking-wider px-3 py-2 whitespace-nowrap" style="color: #3B566B; border-bottom: 1px solid #E2E8F0">Started</th>
+                    <th class="text-left text-xs font-semibold uppercase tracking-wider px-3 py-2 whitespace-nowrap" style="color: #3B566B; border-bottom: 1px solid #E2E8F0">Duration</th>
+                    <th class="text-right text-xs font-semibold uppercase tracking-wider px-3 py-2 whitespace-nowrap" style="color: #3B566B; border-bottom: 1px solid #E2E8F0">Action</th>
                   </tr>
                 </thead>
                 <tbody>
                   @for (s of activeSessions(); track s.Id) {
                     <tr class="hover:bg-blue-50/50 transition-colors">
-                      <td class="px-3 py-2 text-sm cursor-pointer" style="border-bottom: 1px solid #E2E8F0; color: #1275E2" (click)="goToDriver(s.DriverId)">{{ s.DriverName || s.DriverId }}</td>
+                      <td class="px-3 py-2 text-sm cursor-pointer" style="border-bottom: 1px solid #E2E8F0; color: #03A9F4" (click)="goToDriver(s.DriverId)">{{ s.DriverName || s.DriverId }}</td>
                       <td class="px-3 py-2 text-sm" style="border-bottom: 1px solid #E2E8F0">{{ s.ActivatedAt }}</td>
                       <td class="px-3 py-2 text-sm" style="border-bottom: 1px solid #E2E8F0">{{ s.Duration }}</td>
                       <td class="px-3 py-2 text-right" style="border-bottom: 1px solid #E2E8F0">
@@ -165,29 +164,29 @@ import {
         <!-- OCPP Logs -->
         <div class="bg-white" style="border: 1px solid #E2E8F0; border-radius: 6px; padding: 16px 20px">
           <div class="flex items-center justify-between mb-3">
-            <span class="text-xs font-semibold uppercase tracking-wider" style="color: #64748B">OCPP Logs (Last 24h)</span>
-            <button class="text-xs font-medium cursor-pointer" style="color: #1275E2" (click)="loadLogs()">Refresh</button>
+            <span class="text-xs font-semibold uppercase tracking-wider" style="color: #3B566B">OCPP Logs (Last 24h)</span>
+            <button class="text-xs font-medium cursor-pointer" style="color: #03A9F4" (click)="loadLogs()">Refresh</button>
           </div>
           @if (logsLoading()) {
-            <p class="text-xs text-center py-4" style="color: #64748B">Loading logs...</p>
+            <p class="text-xs text-center py-4" style="color: #3B566B">Loading logs...</p>
           } @else if (logs().length === 0) {
-            <p class="text-xs text-center py-4" style="color: #64748B">No logs available</p>
+            <p class="text-xs text-center py-4" style="color: #3B566B">No logs available</p>
           } @else {
             <div class="overflow-x-auto" style="max-height: 300px; overflow-y: auto">
               <table class="w-full" style="border-collapse: collapse">
                 <thead>
-                  <tr style="background: #F8FAFC; position: sticky; top: 0">
-                    <th class="text-left text-xs font-semibold uppercase tracking-wider px-3 py-2" style="color: #64748B; border-bottom: 1px solid #E2E8F0">Time</th>
-                    <th class="text-left text-xs font-semibold uppercase tracking-wider px-3 py-2" style="color: #64748B; border-bottom: 1px solid #E2E8F0">Direction</th>
-                    <th class="text-left text-xs font-semibold uppercase tracking-wider px-3 py-2" style="color: #64748B; border-bottom: 1px solid #E2E8F0">Action</th>
+                  <tr style="background: #F4F4F4; position: sticky; top: 0">
+                    <th class="text-left text-xs font-semibold uppercase tracking-wider px-3 py-2" style="color: #3B566B; border-bottom: 1px solid #E2E8F0">Time</th>
+                    <th class="text-left text-xs font-semibold uppercase tracking-wider px-3 py-2" style="color: #3B566B; border-bottom: 1px solid #E2E8F0">Direction</th>
+                    <th class="text-left text-xs font-semibold uppercase tracking-wider px-3 py-2" style="color: #3B566B; border-bottom: 1px solid #E2E8F0">Action</th>
                   </tr>
                 </thead>
                 <tbody>
                   @for (log of logs().slice(0, 50); track $index) {
                     <tr>
-                      <td class="px-3 py-1.5 text-xs font-mono" style="border-bottom: 1px solid #E2E8F0; color: #64748B">{{ log.timestamp }}</td>
+                      <td class="px-3 py-1.5 text-xs font-mono" style="border-bottom: 1px solid #E2E8F0; color: #3B566B">{{ log.timestamp }}</td>
                       <td class="px-3 py-1.5 text-xs" style="border-bottom: 1px solid #E2E8F0">{{ log.direction }}</td>
-                      <td class="px-3 py-1.5 text-xs font-medium" style="border-bottom: 1px solid #E2E8F0; color: #0F172A">{{ log.action }}</td>
+                      <td class="px-3 py-1.5 text-xs font-medium" style="border-bottom: 1px solid #E2E8F0; color: #000000">{{ log.action }}</td>
                     </tr>
                   }
                 </tbody>
@@ -259,7 +258,7 @@ export class StationProfileComponent implements OnInit {
 
   headerBorderColor(): string {
     const state = this.overallState();
-    return state === StationState.NotActive || state === StationState.Maintenance ? '#DC2626' : '#1275E2';
+    return state === StationState.NotActive || state === StationState.Maintenance ? '#DC2626' : '#03A9F4';
   }
 
   typeLabel(): string {
@@ -280,7 +279,7 @@ export class StationProfileComponent implements OnInit {
 
   connAccentColor(conn: AdminConnectorDto): string {
     if (conn.State === StationState.Maintenance) return '#DC2626';
-    if (conn.State === StationState.Occupied) return '#1275E2';
+    if (conn.State === StationState.Occupied) return '#03A9F4';
     return '#E2E8F0';
   }
 
@@ -291,7 +290,7 @@ export class StationProfileComponent implements OnInit {
 
   connIconBg(conn: AdminConnectorDto): string {
     if (conn.State === StationState.Maintenance) return '#FEE2E2';
-    if (conn.State === StationState.Occupied) return '#EFF6FF';
+    if (conn.State === StationState.Occupied) return '#E1F5FE';
     return '#E2E8F0';
   }
 

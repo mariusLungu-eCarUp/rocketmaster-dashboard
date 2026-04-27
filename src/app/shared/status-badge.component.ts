@@ -32,7 +32,7 @@ export class StatusBadgeComponent {
   }
 
   color(): string {
-    return STATE_STYLES[this.state()]?.color ?? '#64748B';
+    return STATE_STYLES[this.state()]?.color ?? '#3B566B';
   }
 
   bg(): string {
@@ -57,9 +57,9 @@ const STATE_LABELS: Record<StationState, string> = {
 const STATE_STYLES: Record<StationState, { color: string; bg: string; border: string }> = {
   [StationState.NotActive]: { color: '#DC2626', bg: '#FFF5F5', border: '#FECACA' },
   [StationState.Free]: { color: '#059669', bg: '#ECFDF5', border: '#6EE7B7' },
-  [StationState.Occupied]: { color: '#1275E2', bg: '#EFF6FF', border: '#BFDBFE' },
+  [StationState.Occupied]: { color: '#03A9F4', bg: '#E1F5FE', border: '#B3E5FC' },
   [StationState.Maintenance]: { color: '#DC2626', bg: '#FFF5F5', border: '#FECACA' },
   [StationState.Reserved]: { color: '#7C3AED', bg: '#F5F3FF', border: '#C4B5FD' },
-  [StationState.Unknown]: { color: '#64748B', bg: '#F1F5F9', border: '#E2E8F0' },
+  [StationState.Unknown]: { color: '#3B566B', bg: '#F1F5F9', border: '#E2E8F0' },
   [StationState.Preparing]: { color: '#C55B00', bg: '#FFF8F0', border: '#FED7AA' },
 };

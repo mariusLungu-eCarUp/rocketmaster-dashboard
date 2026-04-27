@@ -8,7 +8,7 @@ import { TopbarComponent } from './topbar.component';
   imports: [RouterOutlet, SidebarComponent, TopbarComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   styles: [`
-    :host { display: flex; height: 100vh; overflow: hidden; background: #F8FAFC; }
+    :host { display: flex; height: 100vh; overflow: hidden; background: #F4F4F4; }
     .main-area { flex: 1; display: flex; flex-direction: column; min-width: 0; overflow: hidden; }
     .main-area main { flex: 1; overflow: auto; }
   `],

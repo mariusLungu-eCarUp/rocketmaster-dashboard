@@ -7,21 +7,21 @@ import { ChangeDetectionStrategy, Component, input, output, ViewEncapsulation } 
   template: `
     <div
       class="fixed inset-0 flex items-center justify-center z-50 p-4"
-      style="background: rgba(15,23,42,0.28)"
+      style="background: rgba(0,0,0,0.28)"
       role="dialog"
       aria-modal="true"
     >
       <div class="bg-white rounded-lg shadow-xl max-w-sm w-full p-6" style="border: 1px solid #E2E8F0">
-        <h2 class="text-base font-semibold mb-2" style="color: #0F172A">{{ title() }}</h2>
+        <h2 class="text-base font-semibold mb-2" style="color: #000000">{{ title() }}</h2>
         @if (message()) {
-          <p class="text-sm mb-6" style="color: #64748B">{{ message() }}</p>
+          <p class="text-sm mb-6" style="color: #3B566B">{{ message() }}</p>
         }
         <div class="flex gap-3 justify-end">
           <button
             type="button"
             (click)="cancelled.emit()"
             class="px-4 py-2 text-sm font-medium rounded-md"
-            style="color: #64748B; border: 1px solid #E2E8F0"
+            style="color: #3B566B; border: 1px solid #E2E8F0"
           >
             Cancel
           </button>

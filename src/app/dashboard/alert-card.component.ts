@@ -36,9 +36,9 @@ export interface DashboardAlert {
           <div class="flex items-center gap-2">
             <span class="inline-block w-2 h-2 rounded-full shrink-0" [style.background]="accentColor()"
               [style.box-shadow]="alert().severity === 'critical' ? '0 0 0 3px ' + accentColor() + '22' : 'none'"></span>
-            <span class="text-sm font-semibold" style="color: #0F172A; line-height: 1.3">{{ alert().title }}</span>
+            <span class="text-sm font-semibold" style="color: #000000; line-height: 1.3">{{ alert().title }}</span>
           </div>
-          <div class="text-xs mt-1" style="color: #64748B; line-height: 1.5; margin-left: 18px">{{ alert().description }}</div>
+          <div class="text-xs mt-1" style="color: #3B566B; line-height: 1.5; margin-left: 18px">{{ alert().description }}</div>
         </div>
         @if (alert().severity !== 'info' && alert().items.length > 0) {
           <button
@@ -56,7 +56,7 @@ export interface DashboardAlert {
       </div>
 
       <div class="flex items-center gap-2" style="margin-left: 18px">
-        <span class="text-xs font-bold rounded-full px-2 py-0.5"
+        <span class="text-xs font-semibold rounded-full px-2 py-0.5"
           [style.color]="accentColor()"
           [style.background]="pillBg()">
           {{ alert().count }} {{ alert().unit }}
@@ -68,14 +68,14 @@ export interface DashboardAlert {
           @for (item of alert().items.slice(0, 4); track item.id) {
             <span
               class="text-xs font-medium px-2 py-0.5 rounded cursor-pointer"
-              style="color: #1275E2; background: #EFF6FF; border: 1px solid #BFDBFE"
+              style="color: #03A9F4; background: #E1F5FE; border: 1px solid #B3E5FC"
               (click)="navigateTo(item.route); $event.stopPropagation()"
             >
               {{ item.label }}
             </span>
           }
           @if (alert().items.length > 4) {
-            <span class="text-xs font-medium px-2 py-0.5 rounded" style="color: #64748B; background: #E2E8F0; border: 1px solid #E2E8F0">
+            <span class="text-xs font-medium px-2 py-0.5 rounded" style="color: #3B566B; background: #E2E8F0; border: 1px solid #E2E8F0">
               +{{ alert().items.length - 4 }} more
             </span>
           }
@@ -91,7 +91,7 @@ export class AlertCardComponent {
 
   accentColor(): string {
     const s = this.alert().severity;
-    return s === 'critical' ? '#DC2626' : s === 'warning' ? '#C55B00' : '#5F78A3';
+    return s === 'critical' ? '#DC2626' : s === 'warning' ? '#C55B00' : '#3B566B';
   }
 
   bgColor(): string {

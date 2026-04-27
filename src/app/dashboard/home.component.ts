@@ -3,10 +3,11 @@ import { SupportDataStore } from '../store/support-data.store';
 import { StatTileComponent } from './stat-tile.component';
 import { AlertCardComponent, DashboardAlert } from './alert-card.component';
 import { StationState } from '../store/models';
+import { IconComponent } from '../shared/icon.component';
 
 @Component({
   selector: 'app-home',
-  imports: [StatTileComponent, AlertCardComponent],
+  imports: [StatTileComponent, AlertCardComponent, IconComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   encapsulation: ViewEncapsulation.None,
   template: `
@@ -14,22 +15,22 @@ import { StationState } from '../store/models';
       <!-- Header -->
       <div class="flex items-baseline justify-between">
         <div>
-          <h1 class="text-lg font-semibold" style="color: #0F172A">Support Operations Center</h1>
-          <p class="text-sm mt-0.5" style="color: #64748B">{{ today }}</p>
+          <h1 style="color: #000000; font-size: 22px; font-weight: 500; line-height: 30px; margin: 0">Support Operations Center</h1>
+          <p class="text-sm mt-0.5" style="color: #3B566B">{{ today }}</p>
         </div>
       </div>
 
       <!-- Stat tiles -->
       <div class="grid grid-cols-3 gap-3">
         <app-stat-tile label="Total Stations" [value]="store.stations().length" subtitle="across all CPOs" />
-        <app-stat-tile label="Active Sessions" [value]="store.chargings().length" subtitle="right now" [color]="store.chargings().length > 0 ? '#1275E2' : ''" />
+        <app-stat-tile label="Active Sessions" [value]="store.chargings().length" subtitle="right now" [color]="store.chargings().length > 0 ? '#03A9F4' : ''" />
         <app-stat-tile label="Total Users" [value]="store.users().length" subtitle="registered accounts" />
       </div>
 
       <!-- Alerts -->
       @if (alerts().length > 0) {
         <div class="flex flex-col gap-2.5">
-          <span class="text-xs font-semibold uppercase tracking-wider" style="color: #64748B; letter-spacing: 0.07em">Active Alerts</span>
+          <span class="text-xs font-semibold uppercase tracking-wider" style="color: #3B566B; letter-spacing: 0.07em">Active Alerts</span>
           @for (alert of alerts(); track alert.title) {
             <app-alert-card [alert]="alert" />
           }
@@ -37,11 +38,8 @@ import { StationState } from '../store/models';
       }
 
       @if (alerts().length === 0 && !store.loading()) {
-        <div class="text-center py-12" style="color: #64748B">
-          <svg class="mx-auto mb-3" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#E2E8F0" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M22 11.08V12a10 10 0 11-5.93-9.14" />
-            <path d="M22 4L12 14.01l-3-3" />
-          </svg>
+        <div class="text-center py-12" style="color: #3B566B">
+          <span class="mx-auto mb-3 block" style="width: 40px"><app-icon name="check-circle" [size]="40" color="#E2E8F0" [strokeWidth]="1.5" /></span>
           <p class="text-sm font-medium">All systems operational</p>
           <p class="text-xs mt-1">No active alerts detected</p>
         </div>

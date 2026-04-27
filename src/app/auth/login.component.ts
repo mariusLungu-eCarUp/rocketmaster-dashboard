@@ -3,23 +3,22 @@ import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { AuthService } from './auth.service';
 import { SupportDataStore } from '../store/support-data.store';
+import { IconComponent } from '../shared/icon.component';
 
 @Component({
   selector: 'app-login',
-  imports: [ReactiveFormsModule],
+  imports: [ReactiveFormsModule, IconComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   encapsulation: ViewEncapsulation.None,
   template: `
-    <div class="min-h-screen flex items-center justify-center p-4" style="background: #F8FAFC">
+    <div class="min-h-screen flex items-center justify-center p-4" style="background: #F4F4F4">
       <div class="w-full max-w-sm">
         <div class="text-center mb-8">
-          <div class="w-12 h-12 rounded-xl mx-auto mb-4 flex items-center justify-center" style="background: #1275E2">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" />
-            </svg>
+          <div class="w-12 h-12 rounded-xl mx-auto mb-4 flex items-center justify-center" style="background: #03A9F4">
+            <app-icon name="zap" [size]="20" color="white" [strokeWidth]="2.2" />
           </div>
-          <h1 class="text-xl font-semibold" style="color: #0F172A">Rocketmaster</h1>
-          <p class="text-sm mt-1" style="color: #64748B">Support Operations Dashboard</p>
+          <h1 class="text-xl font-semibold" style="color: #000000">Rocketmaster</h1>
+          <p class="text-sm mt-1" style="color: #3B566B">Support Operations Dashboard</p>
         </div>
 
         <form
@@ -35,7 +34,7 @@ import { SupportDataStore } from '../store/support-data.store';
           }
 
           <div>
-            <label for="username" class="block text-xs font-medium mb-1 uppercase tracking-wider" style="color: #64748B">
+            <label for="username" class="block text-xs font-medium mb-1 uppercase tracking-wider" style="color: #3B566B">
               Username
             </label>
             <input
@@ -44,13 +43,13 @@ import { SupportDataStore } from '../store/support-data.store';
               formControlName="username"
               autocomplete="username"
               class="w-full px-3 py-2 rounded-md text-sm focus:outline-none focus:ring-2"
-              style="border: 1.5px solid #E2E8F0; color: #0F172A; background: #F8FAFC"
+              style="border: 1.5px solid #E2E8F0; color: #000000; background: #F4F4F4"
               [style.border-color]="form.controls.username.invalid && form.controls.username.touched ? '#DC2626' : '#E2E8F0'"
             />
           </div>
 
           <div>
-            <label for="password" class="block text-xs font-medium mb-1 uppercase tracking-wider" style="color: #64748B">
+            <label for="password" class="block text-xs font-medium mb-1 uppercase tracking-wider" style="color: #3B566B">
               Password
             </label>
             <input
@@ -59,7 +58,7 @@ import { SupportDataStore } from '../store/support-data.store';
               formControlName="password"
               autocomplete="current-password"
               class="w-full px-3 py-2 rounded-md text-sm focus:outline-none focus:ring-2"
-              style="border: 1.5px solid #E2E8F0; color: #0F172A; background: #F8FAFC"
+              style="border: 1.5px solid #E2E8F0; color: #000000; background: #F4F4F4"
               [style.border-color]="form.controls.password.invalid && form.controls.password.touched ? '#DC2626' : '#E2E8F0'"
             />
           </div>
@@ -68,7 +67,7 @@ import { SupportDataStore } from '../store/support-data.store';
             type="submit"
             [disabled]="loading() || form.invalid"
             class="w-full py-2.5 px-4 text-white text-sm font-medium rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-            style="background: #1275E2"
+            style="background: #03A9F4"
           >
             @if (loading()) {
               <span class="inline-flex items-center gap-2">
