@@ -1,0 +1,28 @@
+{
+  "permissions": {
+    "allow": [
+      "Read(//c/Users/MariusLungu/Desktop/**)",
+      "Bash(git push:*)",
+      "Read(//c/Users/MariusLungu/Documents/Dev/ecarup-cloud/Web/Ecarup.WebApi.Dtos/**)",
+	  "Read(//c/Users/MariusLungu/Documents/Dev/ecarup-portal/**)",
+      "Read(//c/Users/MariusLungu/Documents/Dev/ecarup-cloud/**)",
+      "Bash(npm run lint)",
+      "Bash(npx tsc:*)",
+      "Bash(node -e:*)",
+      "Bash(gh pr list:*)",
+      "Bash(find:*)",
+      "Bash(dir /b /s \"C:\\Users\\MariusLungu\\Documents\\Dev\\rocketmaster-dashboard\")",
+      "Bash(findstr:*)",
+      "Bash(git log:*)",
+      "Bash(curl:*)",
+      "mcp__ide__getDiagnostics",
+      "Bash(gh pr view:*)",
+      "Bash(npx ng build:*)",
+      "Bash(npx ng:*)",
+      "Bash(npm ls:*)",
+      "Bash(grep -c \"flex\" dist/rocketmaster-dashboard/browser/styles-*.css)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}

@@ -1,4 +1,4 @@
 export const environment = {
   production: false,
-  apiBaseUrl: 'https://test.ecarup.com',
+  apiBaseUrl: 'http://localhost:57657',
 };
