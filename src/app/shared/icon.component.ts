@@ -6,9 +6,10 @@ import {
   MapPin, User, RotateCcw, Lock, Unlock, Settings, Wrench,
   Shield, CreditCard, Key, Car, Trash2, Mail,
   CheckCircle, AlertTriangle, AlertCircle, Info,
-  Building2, Activity, CircleDot, ChevronRight,
+  Building2, Activity, CircleDot, ChevronRight, ChevronDown,
   Download, Filter, Calendar, FileText, Eye,
   Plus, Pencil, X, Send, DollarSign, Clock,
+  Wifi, WifiOff,
 } from 'lucide';
 
 type IconNode = [string, Record<string, string | number | undefined>][];
@@ -23,11 +24,12 @@ const ICONS: Record<string, IconNode> = {
   'check-circle': CheckCircle, 'alert-triangle': AlertTriangle,
   'alert-circle': AlertCircle, info: Info,
   'building-2': Building2, activity: Activity, 'circle-dot': CircleDot,
-  'chevron-right': ChevronRight,
+  'chevron-right': ChevronRight, 'chevron-down': ChevronDown,
   download: Download, filter: Filter, calendar: Calendar,
   'file-text': FileText, eye: Eye,
   plus: Plus, pencil: Pencil, x: X, send: Send,
   'dollar-sign': DollarSign, clock: Clock,
+  wifi: Wifi, 'wifi-off': WifiOff,
 };
 
 @Component({

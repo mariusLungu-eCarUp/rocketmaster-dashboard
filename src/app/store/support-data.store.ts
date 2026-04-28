@@ -241,10 +241,17 @@ export class SupportDataStore {
     );
   }
 
-  getStationLogs(stationId: string, from: number, to: number): Observable<OcppLogEntry[]> {
-    return this.http.get<OcppLogEntry[]>(
-      `${environment.apiBaseUrl}/api/rocketmaster/stations/${stationId}/logs?from=${from}&to=${to}`,
-    );
+  getStationLogs(
+    stationId: string,
+    from: number,
+    to: number,
+    options?: { limit?: number; offset?: number; searchTerm?: string },
+  ): Observable<OcppLogEntry[]> {
+    let url = `${environment.apiBaseUrl}/api/rocketmaster/stations/${stationId}/logs?from=${from}&to=${to}`;
+    if (options?.limit != null) url += `&limit=${options.limit}`;
+    if (options?.offset != null) url += `&offset=${options.offset}`;
+    if (options?.searchTerm) url += `&searchTerm=${encodeURIComponent(options.searchTerm)}`;
+    return this.http.get<OcppLogEntry[]>(url);
   }
 
   updateStation(stationId: string, dto: { Name?: string; Address?: string; Type?: string; SubType?: string }): Observable<void> {

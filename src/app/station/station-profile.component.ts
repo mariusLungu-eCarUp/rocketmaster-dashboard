@@ -6,7 +6,6 @@ import { ConfirmDialogComponent } from '../shared/confirm-dialog.component';
 import { IconComponent } from '../shared/icon.component';
 import {
   AdminConnectorDto,
-  AdminStationDto,
   StationState,
   STATION_TYPE_LABELS,
   STATION_SUBTYPE_LABELS,
@@ -17,6 +16,12 @@ import {
   StationPlugType,
   StationAccessType,
   OcppLogEntry,
+  Permission,
+  StatusNotificationPayload,
+  StopTransactionPayload,
+  ConnectorDiagnostic,
+  HeartbeatInfo,
+  parseOcppPayload,
 } from '../store/models';
 
 @Component({
@@ -51,6 +56,29 @@ import {
                   Owner: {{ station()!.UserId }}
                 </span>
                 <span class="text-xs" style="color: #3B566B">{{ typeLabel() }} / {{ subtypeLabel() }}</span>
+              </div>
+
+              <!-- B1 + B2: Diagnostic indicators -->
+              <div class="flex gap-3 flex-wrap mt-2">
+                @if (heartbeatInfo(); as hb) {
+                  <span class="inline-flex items-center gap-1.5 text-xs font-semibold rounded-full px-2.5 py-0.5"
+                    [style.color]="hb.level === 'green' ? '#059669' : hb.level === 'yellow' ? '#C55B00' : '#DC2626'"
+                    [style.background]="hb.level === 'green' ? '#ECFDF5' : hb.level === 'yellow' ? '#FFF8F0' : '#FFF5F5'"
+                    [style.border]="'1px solid ' + (hb.level === 'green' ? '#6EE7B7' : hb.level === 'yellow' ? '#FED7AA' : '#FECACA')">
+                    <app-icon [name]="hb.level === 'red' ? 'wifi-off' : 'wifi'" [size]="12" />
+                    {{ hb.level === 'red' ? 'Offline' : 'Online' }} ({{ hb.label }})
+                  </span>
+                }
+                @if (lastStationStatus(); as status) {
+                  <span class="inline-flex items-center gap-1.5 text-xs font-semibold rounded-full px-2.5 py-0.5"
+                    [style.color]="status.errorCode !== 'NoError' ? '#DC2626' : '#3B566B'"
+                    [style.background]="status.errorCode !== 'NoError' ? '#FFF5F5' : '#F1F5F9'"
+                    [style.border]="'1px solid ' + (status.errorCode !== 'NoError' ? '#FECACA' : '#E2E8F0')">
+                    <app-icon [name]="status.errorCode !== 'NoError' ? 'alert-triangle' : 'activity'" [size]="12" />
+                    Last: {{ status.status }}{{ status.errorCode !== 'NoError' ? ' — ' + status.errorCode : '' }}
+                    @if (status.info) { ({{ status.info }}) }
+                  </span>
+                }
               </div>
             </div>
 
@@ -97,11 +125,36 @@ import {
                       </div>
                       <div>
                         <div class="text-sm font-semibold" style="color: #000000">C{{ conn.Position }} &mdash; {{ plugLabel(conn.PlugType) }}</div>
-                        <div class="text-xs mt-0.5" style="color: #3B566B">{{ accessLabel(conn.AccessType) }} &middot; {{ conn.EnergyPrice }} {{ conn.Currency }}/kWh</div>
+                        <div class="flex items-center gap-2 mt-0.5">
+                          <span class="text-xs font-semibold px-1.5 py-0.5 rounded"
+                            [style.color]="conn.AccessType === 0 ? '#059669' : conn.AccessType === 1 ? '#C55B00' : '#DC2626'"
+                            [style.background]="conn.AccessType === 0 ? '#ECFDF5' : conn.AccessType === 1 ? '#FFF8F0' : '#FFF5F5'"
+                            [style.border]="'1px solid ' + (conn.AccessType === 0 ? '#6EE7B7' : conn.AccessType === 1 ? '#FED7AA' : '#FECACA')">
+                            <app-icon [name]="conn.AccessType === 0 ? 'unlock' : 'lock'" [size]="10" />
+                            {{ accessLabel(conn.AccessType) }}
+                          </span>
+                          <span class="text-xs" style="color: #3B566B">{{ conn.EnergyPrice }} {{ conn.Currency }}/kWh</span>
+                        </div>
+                        @if (conn.AccessType === 1) {
+                          <div class="text-xs mt-0.5" style="color: #C55B00">Requires user/group permission</div>
+                        }
+                        @if (conn.AccessType === 2) {
+                          <div class="text-xs mt-0.5" style="color: #DC2626">Private — owner only</div>
+                        }
                       </div>
                     </div>
                     @if (conn.State !== undefined && conn.State !== null) {
-                      <app-status-badge [state]="conn.State" />
+                      <div class="flex flex-col items-end gap-1">
+                        <app-status-badge [state]="conn.State" />
+                        @if (connectorDiagnostics().get(conn.Position); as diag) {
+                          @if (diag.errorCode !== 'NoError') {
+                            <span class="text-xs font-mono" style="color: #DC2626">{{ diag.errorCode }}</span>
+                            @if (diag.vendorErrorCode) {
+                              <span class="text-xs font-mono" style="color: #3B566B">{{ diag.vendorErrorCode }}</span>
+                            }
+                          }
+                        }
+                      </div>
                     }
                   </div>
                 }
@@ -140,6 +193,7 @@ import {
                     <th class="text-left text-xs font-semibold uppercase tracking-wider px-3 py-2 whitespace-nowrap" style="color: #3B566B; border-bottom: 1px solid #E2E8F0">Driver</th>
                     <th class="text-left text-xs font-semibold uppercase tracking-wider px-3 py-2 whitespace-nowrap" style="color: #3B566B; border-bottom: 1px solid #E2E8F0">Started</th>
                     <th class="text-left text-xs font-semibold uppercase tracking-wider px-3 py-2 whitespace-nowrap" style="color: #3B566B; border-bottom: 1px solid #E2E8F0">Duration</th>
+                    <th class="text-left text-xs font-semibold uppercase tracking-wider px-3 py-2 whitespace-nowrap" style="color: #3B566B; border-bottom: 1px solid #E2E8F0">Stop Reason</th>
                     <th class="text-right text-xs font-semibold uppercase tracking-wider px-3 py-2 whitespace-nowrap" style="color: #3B566B; border-bottom: 1px solid #E2E8F0">Action</th>
                   </tr>
                 </thead>
@@ -149,6 +203,7 @@ import {
                       <td class="px-3 py-2 text-sm cursor-pointer" style="border-bottom: 1px solid #E2E8F0; color: #03A9F4" (click)="goToDriver(s.DriverId)">{{ s.DriverName || s.DriverId }}</td>
                       <td class="px-3 py-2 text-sm" style="border-bottom: 1px solid #E2E8F0">{{ s.ActivatedAt }}</td>
                       <td class="px-3 py-2 text-sm" style="border-bottom: 1px solid #E2E8F0">{{ s.Duration }}</td>
+                      <td class="px-3 py-2 text-xs font-mono" style="border-bottom: 1px solid #E2E8F0; color: #3B566B">{{ stopReasons().get(s.Id) || '—' }}</td>
                       <td class="px-3 py-2 text-right" style="border-bottom: 1px solid #E2E8F0">
                         <button class="text-xs font-medium px-2 py-1 rounded cursor-pointer" style="color: #DC2626; border: 1px solid #FECACA"
                           (click)="stopCharging(s.Id)">Stop</button>
@@ -161,33 +216,166 @@ import {
           }
         </div>
 
-        <!-- OCPP Logs -->
+        <!-- C2: Owner access warning -->
+        @if (ownerAccessWarning()) {
+          <div class="flex items-start gap-3 p-3 rounded-md" style="background: #FFF8F0; border: 1px solid #FED7AA; border-left: 3px solid #C55B00">
+            <app-icon name="alert-triangle" [size]="16" color="#C55B00" style="flex-shrink: 0; margin-top: 1px" />
+            <div>
+              <div class="text-sm font-semibold" style="color: #C55B00">Owner has no access permission</div>
+              <div class="text-xs mt-0.5" style="color: #3B566B">
+                This station has Limited-access connectors, but owner
+                <span class="font-mono cursor-pointer" style="color: #03A9F4" (click)="goToOwner()">{{ station()!.UserId }}</span>
+                is not listed in the access permissions. The owner may be unable to charge.
+              </div>
+            </div>
+          </div>
+        }
+
+        <!-- C3: Access Permissions -->
+        @if (stationPermissions().length > 0 || hasLimitedConnectors()) {
+          <div class="bg-white" style="border: 1px solid #E2E8F0; border-radius: 6px; padding: 16px 20px">
+            <div class="flex items-center justify-between mb-3">
+              <span class="text-xs font-semibold uppercase tracking-wider" style="color: #3B566B">Access Permissions</span>
+              <span class="text-xs" style="color: #3B566B">{{ stationPermissions().length }} permission(s)</span>
+            </div>
+            @if (stationPermissions().length === 0) {
+              <p class="text-xs text-center py-4" style="color: #3B566B">No permissions configured for this station</p>
+            } @else {
+              <div class="overflow-x-auto">
+                <table class="w-full" style="border-collapse: collapse">
+                  <thead>
+                    <tr style="background: #F4F4F4">
+                      <th class="text-left text-xs font-semibold uppercase tracking-wider px-3 py-2" style="color: #3B566B; border-bottom: 1px solid #E2E8F0">Assignee</th>
+                      <th class="text-left text-xs font-semibold uppercase tracking-wider px-3 py-2" style="color: #3B566B; border-bottom: 1px solid #E2E8F0">Type</th>
+                      <th class="text-left text-xs font-semibold uppercase tracking-wider px-3 py-2" style="color: #3B566B; border-bottom: 1px solid #E2E8F0">Permission</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    @for (p of stationPermissions(); track $index) {
+                      <tr>
+                        <td class="px-3 py-2 text-sm font-mono" style="border-bottom: 1px solid #E2E8F0">
+                          @if (p.AssigneeType === 'user') {
+                            <span class="cursor-pointer" style="color: #03A9F4" (click)="goToDriver(p.AssigneeId)">{{ p.AssigneeId }}</span>
+                          } @else {
+                            <span style="color: #000000">{{ p.AssigneeId }}</span>
+                          }
+                        </td>
+                        <td class="px-3 py-2 text-xs" style="border-bottom: 1px solid #E2E8F0">
+                          <span class="text-xs font-medium px-1.5 py-0.5 rounded"
+                            [style.color]="p.AssigneeType === 'user' ? '#03A9F4' : '#7C3AED'"
+                            [style.background]="p.AssigneeType === 'user' ? '#E1F5FE' : '#F5F3FF'">
+                            {{ p.AssigneeType }}
+                          </span>
+                        </td>
+                        <td class="px-3 py-2 text-xs" style="border-bottom: 1px solid #E2E8F0; color: #3B566B">{{ p.Type }}</td>
+                      </tr>
+                    }
+                  </tbody>
+                </table>
+              </div>
+            }
+          </div>
+        }
+
+        <!-- OCPP Logs (Enhanced) -->
         <div class="bg-white" style="border: 1px solid #E2E8F0; border-radius: 6px; padding: 16px 20px">
           <div class="flex items-center justify-between mb-3">
-            <span class="text-xs font-semibold uppercase tracking-wider" style="color: #3B566B">OCPP Logs (Last 24h)</span>
-            <button class="text-xs font-medium cursor-pointer" style="color: #03A9F4" (click)="loadLogs()">Refresh</button>
+            <span class="text-xs font-semibold uppercase tracking-wider" style="color: #3B566B">OCPP Logs</span>
+            <div class="flex items-center gap-2">
+              <span class="text-xs" style="color: #3B566B">{{ filteredLogs().length }} entries</span>
+              <button class="flex items-center gap-1 text-xs font-medium px-2 py-1 rounded cursor-pointer"
+                style="color: #03A9F4; border: 1px solid #B3E5FC"
+                (click)="exportLogsCsv()">
+                <app-icon name="download" [size]="12" />
+                CSV
+              </button>
+              <button class="flex items-center justify-center cursor-pointer"
+                style="width: 28px; height: 28px; border-radius: 4px; color: #3B566B"
+                (click)="loadLogs()" title="Refresh logs">
+                <app-icon name="refresh-cw" [size]="13" />
+              </button>
+            </div>
           </div>
+
+          <!-- Controls bar -->
+          <div class="flex flex-wrap gap-2 mb-3 items-center">
+            <div class="flex items-center gap-1">
+              <app-icon name="calendar" [size]="12" color="#3B566B" />
+              <input type="date" class="text-xs px-2 py-1 rounded"
+                style="border: 1px solid #E2E8F0; color: #3B566B; outline: none"
+                [value]="logFrom()"
+                (change)="logFrom.set($any($event.target).value)" />
+              <span class="text-xs" style="color: #3B566B">to</span>
+              <input type="date" class="text-xs px-2 py-1 rounded"
+                style="border: 1px solid #E2E8F0; color: #3B566B; outline: none"
+                [value]="logTo()"
+                (change)="logTo.set($any($event.target).value)" />
+              <button class="text-xs font-medium px-2 py-1 rounded cursor-pointer"
+                style="color: #FFFFFF; background: #03A9F4"
+                (click)="loadLogs()">Load</button>
+            </div>
+            <div class="flex items-center gap-1">
+              <app-icon name="filter" [size]="12" color="#3B566B" />
+              <select class="text-xs px-2 py-1 rounded"
+                style="border: 1px solid #E2E8F0; color: #3B566B; outline: none; min-width: 140px"
+                [value]="logActionFilter()"
+                (change)="logActionFilter.set($any($event.target).value)">
+                <option value="">All Actions</option>
+                @for (action of logActionTypes(); track action) {
+                  <option [value]="action">{{ action }}</option>
+                }
+              </select>
+            </div>
+            <div class="flex items-center gap-1">
+              <app-icon name="search" [size]="12" color="#3B566B" />
+              <input type="text" placeholder="Search logs..."
+                class="text-xs px-2 py-1 rounded"
+                style="border: 1px solid #E2E8F0; color: #3B566B; outline: none; min-width: 160px"
+                [value]="logSearch()"
+                (input)="logSearch.set($any($event.target).value)" />
+            </div>
+          </div>
+
           @if (logsLoading()) {
             <p class="text-xs text-center py-4" style="color: #3B566B">Loading logs...</p>
-          } @else if (logs().length === 0) {
+          } @else if (filteredLogs().length === 0) {
             <p class="text-xs text-center py-4" style="color: #3B566B">No logs available</p>
           } @else {
-            <div class="overflow-x-auto" style="max-height: 300px; overflow-y: auto">
+            <div class="overflow-x-auto" style="max-height: 500px; overflow-y: auto">
               <table class="w-full" style="border-collapse: collapse">
                 <thead>
-                  <tr style="background: #F4F4F4; position: sticky; top: 0">
+                  <tr style="background: #F4F4F4; position: sticky; top: 0; z-index: 1">
+                    <th style="width: 24px; border-bottom: 1px solid #E2E8F0"></th>
                     <th class="text-left text-xs font-semibold uppercase tracking-wider px-3 py-2" style="color: #3B566B; border-bottom: 1px solid #E2E8F0">Time</th>
                     <th class="text-left text-xs font-semibold uppercase tracking-wider px-3 py-2" style="color: #3B566B; border-bottom: 1px solid #E2E8F0">Direction</th>
                     <th class="text-left text-xs font-semibold uppercase tracking-wider px-3 py-2" style="color: #3B566B; border-bottom: 1px solid #E2E8F0">Action</th>
                   </tr>
                 </thead>
                 <tbody>
-                  @for (log of logs().slice(0, 50); track $index) {
-                    <tr>
-                      <td class="px-3 py-1.5 text-xs font-mono" style="border-bottom: 1px solid #E2E8F0; color: #3B566B">{{ log.timestamp }}</td>
-                      <td class="px-3 py-1.5 text-xs" style="border-bottom: 1px solid #E2E8F0">{{ log.direction }}</td>
+                  @for (log of filteredLogs(); track $index) {
+                    <tr class="cursor-pointer hover:bg-blue-50/50" (click)="expandedLogIndex.set(expandedLogIndex() === $index ? null : $index)">
+                      <td class="px-1 py-1.5 text-center" style="border-bottom: 1px solid #E2E8F0">
+                        <app-icon name="chevron-right" [size]="12" color="#3B566B"
+                          [style.transform]="expandedLogIndex() === $index ? 'rotate(90deg)' : 'none'"
+                          [style.transition]="'transform 0.15s'" />
+                      </td>
+                      <td class="px-3 py-1.5 text-xs font-mono whitespace-nowrap" style="border-bottom: 1px solid #E2E8F0; color: #3B566B">{{ log.timestamp }}</td>
+                      <td class="px-3 py-1.5 text-xs" style="border-bottom: 1px solid #E2E8F0">
+                        <span class="inline-flex items-center text-xs font-medium px-1.5 py-0.5 rounded"
+                          [style.color]="log.direction === 'IN' ? '#059669' : '#03A9F4'"
+                          [style.background]="log.direction === 'IN' ? '#ECFDF5' : '#E1F5FE'">
+                          {{ log.direction }}
+                        </span>
+                      </td>
                       <td class="px-3 py-1.5 text-xs font-medium" style="border-bottom: 1px solid #E2E8F0; color: #000000">{{ log.action }}</td>
                     </tr>
+                    @if (expandedLogIndex() === $index) {
+                      <tr>
+                        <td colspan="4" style="background: #F4F4F4; border-bottom: 1px solid #E2E8F0; padding: 12px 16px">
+                          <pre class="text-xs font-mono whitespace-pre-wrap" style="color: #3B566B; margin: 0; max-height: 300px; overflow-y: auto">{{ formatPayload(log.payload) }}</pre>
+                        </td>
+                      </tr>
+                    }
                   }
                 </tbody>
               </table>
@@ -218,6 +406,13 @@ export class StationProfileComponent implements OnInit {
   readonly logsLoading = signal(false);
   readonly showHardReset = signal(false);
 
+  // --- B3: Log viewer state ---
+  readonly logFrom = signal(this.defaultFromDate());
+  readonly logTo = signal(this.defaultToDate());
+  readonly logSearch = signal('');
+  readonly logActionFilter = signal('');
+  readonly expandedLogIndex = signal<number | null>(null);
+
   readonly station = computed(() => this.store.stationById().get(this.stationId()));
 
   readonly activeSessions = computed(() =>
@@ -247,6 +442,124 @@ export class StationProfileComponent implements OnInit {
       { label: 'Owner ID', value: s.UserId },
       ...(s.HubjectEvseIds?.length ? [{ label: 'Hubject EVSE', value: s.HubjectEvseIds.join(', ') }] : []),
     ];
+  });
+
+  // --- B3: Log filtering ---
+  readonly logActionTypes = computed(() => {
+    const actions = new Set(this.logs().map((l) => l.action));
+    return Array.from(actions).sort();
+  });
+
+  readonly filteredLogs = computed(() => {
+    let result = this.logs();
+    const search = this.logSearch().toLowerCase().trim();
+    const actionFilter = this.logActionFilter();
+
+    if (actionFilter) {
+      result = result.filter((l) => l.action === actionFilter);
+    }
+    if (search) {
+      result = result.filter(
+        (l) =>
+          l.action.toLowerCase().includes(search) ||
+          l.direction.toLowerCase().includes(search) ||
+          l.timestamp.toLowerCase().includes(search) ||
+          JSON.stringify(l.payload).toLowerCase().includes(search),
+      );
+    }
+    return result;
+  });
+
+  // --- B1: StatusNotification diagnostics ---
+  readonly connectorDiagnostics = computed<Map<number, ConnectorDiagnostic>>(() => {
+    const map = new Map<number, ConnectorDiagnostic>();
+    const statusLogs = this.logs()
+      .filter((l) => l.action === 'StatusNotification')
+      .reverse();
+
+    for (const log of statusLogs) {
+      const p = parseOcppPayload<StatusNotificationPayload>(log.payload, [
+        'connectorId',
+        'status',
+        'errorCode',
+      ]);
+      if (!p || p.connectorId == null) continue;
+      map.set(p.connectorId, {
+        connectorId: p.connectorId,
+        status: p.status ?? 'Unknown',
+        errorCode: p.errorCode ?? 'NoError',
+        info: p.info ?? '',
+        vendorErrorCode: p.vendorErrorCode ?? '',
+        timestamp: p.timestamp ?? log.timestamp,
+      });
+    }
+    return map;
+  });
+
+  readonly lastStationStatus = computed(() => {
+    const diag = this.connectorDiagnostics();
+    const stationLevel = diag.get(0);
+    if (stationLevel && stationLevel.errorCode !== 'NoError') return stationLevel;
+    for (const [, d] of diag) {
+      if (d.errorCode !== 'NoError') return d;
+    }
+    return stationLevel ?? null;
+  });
+
+  // --- B2: Heartbeat connectivity ---
+  readonly heartbeatInfo = computed<HeartbeatInfo | null>(() => {
+    const heartbeats = this.logs().filter((l) => l.action === 'Heartbeat');
+    if (heartbeats.length === 0) return null;
+
+    const latest = heartbeats[0];
+    const lastSeen = new Date(latest.timestamp);
+    const ageMs = Date.now() - lastSeen.getTime();
+
+    const label = this.formatAge(ageMs);
+    let level: 'green' | 'yellow' | 'red';
+    if (ageMs < 5 * 60 * 1000) level = 'green';
+    else if (ageMs < 30 * 60 * 1000) level = 'yellow';
+    else level = 'red';
+
+    return { lastSeen, ageMs, label, level };
+  });
+
+  // --- C1/C2/C3: Access & Permissions ---
+  readonly hasLimitedConnectors = computed(() => {
+    const s = this.station();
+    return s?.Connectors?.some((c) => c.AccessType === StationAccessType.Limited) ?? false;
+  });
+
+  readonly stationPermissions = computed<Permission[]>(() => {
+    const id = this.stationId();
+    if (!id) return [];
+    return this.store.permissions().filter((p) => p.TargetResourceId === id);
+  });
+
+  readonly ownerAccessWarning = computed(() => {
+    if (!this.hasLimitedConnectors()) return false;
+    const ownerId = this.station()?.UserId;
+    if (!ownerId) return false;
+    const perms = this.stationPermissions();
+    return !perms.some((p) => p.AssigneeId === ownerId);
+  });
+
+  // --- B4: Stop reasons ---
+  readonly stopReasons = computed<Map<string, string>>(() => {
+    const map = new Map<string, string>();
+    const stopLogs = this.logs().filter((l) => l.action === 'StopTransaction');
+    for (const log of stopLogs) {
+      const p = parseOcppPayload<StopTransactionPayload>(log.payload, [
+        'reason',
+        'transactionId',
+      ]);
+      if (!p) continue;
+      const key = p.transactionId != null ? String(p.transactionId) : log.timestamp;
+      if (p.reason) {
+        map.set(key, p.reason);
+      }
+    }
+    return map;
   });
 
   ngOnInit(): void {
@@ -298,9 +611,12 @@ export class StationProfileComponent implements OnInit {
     const id = this.stationId();
     if (!id) return;
     this.logsLoading.set(true);
-    const now = Math.floor(Date.now() / 1000);
-    const dayAgo = now - 86400;
-    this.store.getStationLogs(id, dayAgo, now).subscribe({
+    this.expandedLogIndex.set(null);
+
+    const from = Math.floor(new Date(this.logFrom()).getTime() / 1000);
+    const to = Math.floor(new Date(this.logTo() + 'T23:59:59').getTime() / 1000);
+
+    this.store.getStationLogs(id, from, to).subscribe({
       next: (logs) => {
         this.logs.set(logs);
         this.logsLoading.set(false);
@@ -310,6 +626,55 @@ export class StationProfileComponent implements OnInit {
         this.logsLoading.set(false);
       },
     });
+  }
+
+  formatAge(ms: number): string {
+    const minutes = Math.floor(ms / 60000);
+    if (minutes < 1) return 'just now';
+    if (minutes < 60) return `${minutes}m ago`;
+    const hours = Math.floor(minutes / 60);
+    if (hours < 24) return `${hours}h ago`;
+    const days = Math.floor(hours / 24);
+    return `${days}d ago`;
+  }
+
+  formatPayload(payload: unknown): string {
+    if (payload == null) return 'null';
+    try {
+      return JSON.stringify(payload, null, 2);
+    } catch {
+      return String(payload);
+    }
+  }
+
+  exportLogsCsv(): void {
+    const rows = this.filteredLogs();
+    const header = 'Timestamp,Direction,Action,Payload\n';
+    const csv =
+      header +
+      rows
+        .map(
+          (l) =>
+            `"${l.timestamp}","${l.direction}","${l.action}","${JSON.stringify(l.payload).replace(/"/g, '""')}"`,
+        )
+        .join('\n');
+
+    const blob = new Blob([csv], { type: 'text/csv' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `ocpp-logs-${this.stationId()}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+  }
+
+  private defaultFromDate(): string {
+    const d = new Date(Date.now() - 86400000);
+    return d.toISOString().slice(0, 10);
+  }
+
+  private defaultToDate(): string {
+    return new Date().toISOString().slice(0, 10);
   }
 
   softReset(): void {

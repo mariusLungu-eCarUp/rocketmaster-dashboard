@@ -168,3 +168,51 @@ export interface OcppLogEntry {
   action: string;
   payload: unknown;
 }
+
+// --- OCPP Payload Types (for diagnostic parsing) ---
+
+export interface StatusNotificationPayload {
+  connectorId: number;
+  status: string;
+  errorCode: string;
+  info?: string;
+  vendorId?: string;
+  vendorErrorCode?: string;
+  timestamp?: string;
+}
+
+export interface HeartbeatPayload {
+  currentTime?: string;
+}
+
+export interface StopTransactionPayload {
+  transactionId?: number;
+  reason?: string;
+  meterStop?: number;
+  timestamp?: string;
+  idTag?: string;
+}
+
+/** Type-safe payload parser. Returns null if payload doesn't match expected shape. */
+export function parseOcppPayload<T>(payload: unknown, requiredKeys: (keyof T)[]): T | null {
+  if (payload == null || typeof payload !== 'object') return null;
+  const obj = payload as Record<string, unknown>;
+  const hasAny = requiredKeys.some((k) => (k as string) in obj);
+  return hasAny ? (obj as T) : null;
+}
+
+export interface ConnectorDiagnostic {
+  connectorId: number;
+  status: string;
+  errorCode: string;
+  info: string;
+  vendorErrorCode: string;
+  timestamp: string;
+}
+
+export interface HeartbeatInfo {
+  lastSeen: Date;
+  ageMs: number;
+  label: string;
+  level: 'green' | 'yellow' | 'red';
+}
