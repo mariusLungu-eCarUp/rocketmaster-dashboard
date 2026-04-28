@@ -52,8 +52,7 @@ import { IconComponent } from '../shared/icon.component';
               <div class="px-3 py-1.5 text-xs font-semibold uppercase tracking-wider" style="color: #3B566B; background: #F4F4F4">Users</div>
               @for (r of userResults(); track r.id) {
                 <button
-                  class="flex items-center gap-3 w-full px-3 py-2 text-left transition-colors cursor-pointer"
-                  class="hover:bg-gray-100"
+                  class="flex items-center gap-3 w-full px-3 py-2 text-left transition-colors cursor-pointer hover:bg-gray-100"
                   (mousedown)="navigate(r)"
                 >
                   <app-icon name="user" [size]="14" color="#3B566B" />
@@ -69,8 +68,7 @@ import { IconComponent } from '../shared/icon.component';
               <div class="px-3 py-1.5 text-xs font-semibold uppercase tracking-wider" style="color: #3B566B; background: #F4F4F4">Stations</div>
               @for (r of stationResults(); track r.id) {
                 <button
-                  class="flex items-center gap-3 w-full px-3 py-2 text-left transition-colors cursor-pointer"
-                  class="hover:bg-gray-100"
+                  class="flex items-center gap-3 w-full px-3 py-2 text-left transition-colors cursor-pointer hover:bg-gray-100"
                   (mousedown)="navigate(r)"
                 >
                   <app-icon name="zap" [size]="14" color="#3B566B" />

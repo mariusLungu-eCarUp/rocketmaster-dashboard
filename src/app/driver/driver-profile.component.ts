@@ -35,7 +35,7 @@ import { License } from '../store/models';
                 <span class="text-xs" style="color: #3B566B">Email: {{ user()!.AnonymizedEmail || '—' }}</span>
                 @if (user()!.LicenseCoverage) {
                   <span class="text-xs font-medium"
-                    [style.color]="user()!.LicenseCoverage.Status?.toLowerCase() === 'exceeded' ? '#DC2626' : '#059669'">
+                    [style.color]="user()!.LicenseCoverage?.Status?.toLowerCase() === 'exceeded' ? '#DC2626' : '#059669'">
                     License: {{ user()!.LicenseCoverage.Status }} ({{ user()!.LicenseCoverage.LicenseCount }}/{{ user()!.LicenseCoverage.ConnectorCount }})
                   </span>
                 }
