@@ -24,13 +24,31 @@ import {
   parseOcppPayload,
 } from '../store/models';
 
+const OCPP_CONFIG_KEYS = [
+  'AllowOfflineTxForUnknownId', 'AuthorizationCacheEnabled', 'AuthorizeRemoteTxRequests',
+  'BlinkRepeat', 'ClockAlignedDataInterval', 'ConnectionTimeOut', 'GetConfigurationMaxKeys',
+  'HeartbeatInterval', 'LightIntensity', 'LocalAuthorizeOffline', 'LocalPreAuthorize',
+  'MaxEnergyOnInvalidId', 'MeterValuesAlignedData', 'MeterValuesAlignedDataMaxLength',
+  'MeterValuesSampledData', 'MeterValuesSampledDataMaxLength', 'MeterValueSampleInterval',
+  'MinimumStatusDuration', 'NumberOfConnectors', 'ResetRetries', 'ConnectorPhaseRotation',
+  'ConnectorPhaseRotationMaxLength', 'StopTransactionOnEVSideDisconnect',
+  'StopTransactionOnInvalidId', 'StopTxnAlignedData', 'StopTxnAlignedDataMaxLength',
+  'StopTxnSampledData', 'StopTxnSampledDataMaxLength', 'SupportedFeatureProfiles',
+  'SupportedFeatureProfilesMaxLength', 'TransactionMessageAttempts',
+  'TransactionMessageRetryInterval', 'UnlockConnectorOnEVSideDisconnect',
+  'WebSocketPingInterval', 'LocalAuthListEnabled', 'LocalAuthListMaxLength',
+  'SendLocalListMaxLength', 'ReserveConnectorZeroSupported', 'ChargeProfileMaxStackLevel',
+  'ChargingScheduleAllowedChargingRateUnit', 'ChargingScheduleMaxPeriods',
+  'ConnectorSwitch3to1PhaseSupported', 'MaxChargingProfilesInstalled',
+];
+
 @Component({
   selector: 'app-station-profile',
   imports: [StatusBadgeComponent, ConfirmDialogComponent, IconComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   encapsulation: ViewEncapsulation.None,
   template: `
-    <div class="flex flex-col gap-5 p-5 pb-10" style="max-width: 1200px">
+    <div class="flex flex-col gap-5 p-5 pb-10" style="max-width: 100%">
       @if (!station()) {
         <div class="text-center py-16" style="color: #3B566B">
           <p class="text-sm">Station not found</p>
@@ -86,6 +104,12 @@ import {
             <div class="flex gap-2 flex-wrap shrink-0">
               <button class="flex items-center gap-1.5 text-xs font-medium px-3 py-1.5 rounded-md cursor-pointer"
                 style="color: #3B566B; border: 1px solid #E2E8F0"
+                (click)="openEditStation()">
+                <app-icon name="pencil" [size]="13" />
+                Edit
+              </button>
+              <button class="flex items-center gap-1.5 text-xs font-medium px-3 py-1.5 rounded-md cursor-pointer"
+                style="color: #3B566B; border: 1px solid #E2E8F0"
                 (click)="softReset()">
                 <app-icon name="rotate-ccw" [size]="13" />
                 Soft Reset
@@ -102,6 +126,26 @@ import {
                   Unlock C{{ conn.Position }}
                 </button>
               }
+              @if (station()!.Type === 1) {
+                <button class="flex items-center gap-1.5 text-xs font-medium px-3 py-1.5 rounded-md cursor-pointer"
+                  style="color: #3B566B; border: 1px solid #E2E8F0"
+                  (click)="openGetConfig()">
+                  <app-icon name="settings" [size]="13" />
+                  Get Config
+                </button>
+                <button class="flex items-center gap-1.5 text-xs font-medium px-3 py-1.5 rounded-md cursor-pointer"
+                  style="color: #3B566B; border: 1px solid #E2E8F0"
+                  (click)="openSetConfig()">
+                  <app-icon name="wrench" [size]="13" />
+                  Set Config
+                </button>
+              }
+              <button class="flex items-center gap-1.5 text-xs font-medium px-3 py-1.5 rounded-md cursor-pointer"
+                style="color: #DC2626; border: 1px solid #FECACA; background: #FFF5F5"
+                (click)="showDeleteStation.set(true)">
+                <app-icon name="trash-2" [size]="13" />
+                Delete
+              </button>
             </div>
           </div>
         </div>
@@ -392,6 +436,150 @@ import {
             (cancelled)="showHardReset.set(false)"
           />
         }
+
+        <!-- D6: Edit Station -->
+        @if (showEditStation()) {
+          <div class="fixed inset-0 flex items-center justify-center z-50 p-4" style="background: rgba(0,0,0,0.28)"
+            (click)="showEditStation.set(false)">
+            <div class="bg-white rounded-lg shadow-xl max-w-md w-full p-6" style="border: 1px solid #E2E8F0"
+              (click)="$event.stopPropagation()">
+              <h2 class="text-base font-semibold mb-4" style="color: #000000">Edit Station</h2>
+              <div class="flex flex-col gap-3">
+                <div>
+                  <label class="text-xs font-medium mb-1 block" style="color: #3B566B">Name</label>
+                  <input type="text" class="w-full text-sm px-3 py-2 rounded-md" style="border: 1px solid #E2E8F0; outline: none"
+                    [value]="editStationName()" (input)="editStationName.set($any($event.target).value)" />
+                </div>
+                <div>
+                  <label class="text-xs font-medium mb-1 block" style="color: #3B566B">Address</label>
+                  <input type="text" class="w-full text-sm px-3 py-2 rounded-md" style="border: 1px solid #E2E8F0; outline: none"
+                    [value]="editStationAddress()" (input)="editStationAddress.set($any($event.target).value)" />
+                </div>
+                <div>
+                  <label class="text-xs font-medium mb-1 block" style="color: #3B566B">Type</label>
+                  <select class="w-full text-sm px-3 py-2 rounded-md" style="border: 1px solid #E2E8F0; outline: none"
+                    [value]="editStationType()" (change)="editStationType.set(+$any($event.target).value)">
+                    <option [value]="0">Smart-me (Meter)</option>
+                    <option [value]="1">OCPP</option>
+                  </select>
+                </div>
+                <div>
+                  <label class="text-xs font-medium mb-1 block" style="color: #3B566B">SubType</label>
+                  <select class="w-full text-sm px-3 py-2 rounded-md" style="border: 1px solid #E2E8F0; outline: none"
+                    [value]="editStationSubType()" (change)="editStationSubType.set(+$any($event.target).value)">
+                    <option [value]="0">On/Off</option>
+                    <option [value]="1">WallBe V1</option>
+                    <option [value]="2">Juice Booster V1</option>
+                    <option [value]="3">Enercab Wallbox T2</option>
+                    <option [value]="4">LadE V1</option>
+                    <option [value]="5">WallBe V2</option>
+                    <option [value]="6">Pico V1</option>
+                  </select>
+                </div>
+              </div>
+              <div class="flex gap-3 justify-end mt-5">
+                <button class="px-4 py-2 text-sm font-medium rounded-md cursor-pointer"
+                  style="color: #3B566B; border: 1px solid #E2E8F0" (click)="showEditStation.set(false)">Cancel</button>
+                <button class="px-4 py-2 text-sm font-medium text-white rounded-md cursor-pointer"
+                  style="background: #03A9F4" (click)="saveStationEdit()">Save</button>
+              </div>
+            </div>
+          </div>
+        }
+
+        <!-- D7: Delete Station -->
+        @if (showDeleteStation()) {
+          <div class="fixed inset-0 flex items-center justify-center z-50 p-4" style="background: rgba(0,0,0,0.28)"
+            (click)="showDeleteStation.set(false)">
+            <div class="bg-white rounded-lg shadow-xl max-w-sm w-full p-6" style="border: 1px solid #E2E8F0"
+              (click)="$event.stopPropagation()">
+              <h2 class="text-base font-semibold mb-2" style="color: #DC2626">Delete Station</h2>
+              <p class="text-sm mb-1" style="color: #3B566B">This action cannot be undone. All station data will be permanently removed.</p>
+              <p class="text-sm mb-3" style="color: #3B566B">Type <strong>{{ station()!.Name || station()!.Id }}</strong> to confirm:</p>
+              <input type="text" class="w-full text-sm px-3 py-2 rounded-md mb-4" style="border: 1px solid #E2E8F0; outline: none"
+                [value]="deleteStationConfirmName()" (input)="deleteStationConfirmName.set($any($event.target).value)" />
+              <div class="flex gap-3 justify-end">
+                <button class="px-4 py-2 text-sm font-medium rounded-md cursor-pointer"
+                  style="color: #3B566B; border: 1px solid #E2E8F0" (click)="showDeleteStation.set(false)">Cancel</button>
+                <button class="px-4 py-2 text-sm font-medium text-white rounded-md cursor-pointer"
+                  style="background: #DC2626"
+                  [style.opacity]="deleteStationConfirmName().trim() === (station()!.Name || station()!.Id)?.trim() ? '1' : '0.4'"
+                  [disabled]="deleteStationConfirmName().trim() !== (station()!.Name || station()!.Id)?.trim()"
+                  (click)="confirmDeleteStation()">Delete</button>
+              </div>
+            </div>
+          </div>
+        }
+
+        <!-- D8: Get Config -->
+        @if (showGetConfig()) {
+          <div class="fixed inset-0 flex items-center justify-center z-50 p-4" style="background: rgba(0,0,0,0.28)"
+            (click)="showGetConfig.set(false)">
+            <div class="bg-white rounded-lg shadow-xl max-w-md w-full p-6" style="border: 1px solid #E2E8F0"
+              (click)="$event.stopPropagation()">
+              <h2 class="text-base font-semibold mb-4" style="color: #000000">Get OCPP Configuration</h2>
+              <div>
+                <label class="text-xs font-medium mb-1 block" style="color: #3B566B">Configuration Key</label>
+                <input type="text" list="ocpp-keys" class="w-full text-sm px-3 py-2 rounded-md" style="border: 1px solid #E2E8F0; outline: none"
+                  placeholder="e.g. HeartbeatInterval"
+                  [value]="configKey()" (input)="configKey.set($any($event.target).value)" />
+                <datalist id="ocpp-keys">
+                  @for (k of ocppKeys; track k) { <option [value]="k">{{ k }}</option> }
+                </datalist>
+              </div>
+              @if (configResult() !== null) {
+                <div class="mt-3 p-3 rounded-md text-sm font-mono" style="background: #F4F4F4; border: 1px solid #E2E8F0; color: #000000; word-break: break-all">
+                  {{ configResult() }}
+                </div>
+              }
+              <div class="flex gap-3 justify-end mt-5">
+                <button class="px-4 py-2 text-sm font-medium rounded-md cursor-pointer"
+                  style="color: #3B566B; border: 1px solid #E2E8F0" (click)="showGetConfig.set(false)">Close</button>
+                <button class="px-4 py-2 text-sm font-medium text-white rounded-md cursor-pointer"
+                  style="background: #03A9F4"
+                  [disabled]="!configKey().trim() || configLoading()"
+                  [style.opacity]="!configKey().trim() || configLoading() ? '0.4' : '1'"
+                  (click)="executeGetConfig()">{{ configLoading() ? 'Loading...' : 'Get' }}</button>
+              </div>
+            </div>
+          </div>
+        }
+
+        <!-- D8: Set Config -->
+        @if (showSetConfig()) {
+          <div class="fixed inset-0 flex items-center justify-center z-50 p-4" style="background: rgba(0,0,0,0.28)"
+            (click)="showSetConfig.set(false)">
+            <div class="bg-white rounded-lg shadow-xl max-w-md w-full p-6" style="border: 1px solid #E2E8F0"
+              (click)="$event.stopPropagation()">
+              <h2 class="text-base font-semibold mb-4" style="color: #000000">Set OCPP Configuration</h2>
+              <div class="flex flex-col gap-3">
+                <div>
+                  <label class="text-xs font-medium mb-1 block" style="color: #3B566B">Configuration Key</label>
+                  <input type="text" list="ocpp-keys-set" class="w-full text-sm px-3 py-2 rounded-md" style="border: 1px solid #E2E8F0; outline: none"
+                    placeholder="e.g. HeartbeatInterval"
+                    [value]="configKey()" (input)="configKey.set($any($event.target).value)" />
+                  <datalist id="ocpp-keys-set">
+                    @for (k of ocppKeys; track k) { <option [value]="k">{{ k }}</option> }
+                  </datalist>
+                </div>
+                <div>
+                  <label class="text-xs font-medium mb-1 block" style="color: #3B566B">Value</label>
+                  <input type="text" class="w-full text-sm px-3 py-2 rounded-md" style="border: 1px solid #E2E8F0; outline: none"
+                    [value]="configValue()" (input)="configValue.set($any($event.target).value)" />
+                </div>
+              </div>
+              <div class="flex gap-3 justify-end mt-5">
+                <button class="px-4 py-2 text-sm font-medium rounded-md cursor-pointer"
+                  style="color: #3B566B; border: 1px solid #E2E8F0" (click)="showSetConfig.set(false)">Cancel</button>
+                <button class="px-4 py-2 text-sm font-medium text-white rounded-md cursor-pointer"
+                  style="background: #03A9F4"
+                  [disabled]="!configKey().trim() || configLoading()"
+                  [style.opacity]="!configKey().trim() || configLoading() ? '0.4' : '1'"
+                  (click)="executeSetConfig()">{{ configLoading() ? 'Saving...' : 'Set' }}</button>
+              </div>
+            </div>
+          </div>
+        }
       }
     </div>
   `,
@@ -405,6 +593,22 @@ export class StationProfileComponent implements OnInit {
   readonly logs = signal<OcppLogEntry[]>([]);
   readonly logsLoading = signal(false);
   readonly showHardReset = signal(false);
+
+  // --- D6/D7/D8: Dialog state ---
+  readonly showEditStation = signal(false);
+  readonly editStationName = signal('');
+  readonly editStationAddress = signal('');
+  readonly editStationType = signal(0);
+  readonly editStationSubType = signal(0);
+  readonly showDeleteStation = signal(false);
+  readonly deleteStationConfirmName = signal('');
+  readonly showGetConfig = signal(false);
+  readonly showSetConfig = signal(false);
+  readonly configKey = signal('');
+  readonly configValue = signal('');
+  readonly configResult = signal<string | null>(null);
+  readonly configLoading = signal(false);
+  readonly ocppKeys = OCPP_CONFIG_KEYS;
 
   // --- B3: Log viewer state ---
   readonly logFrom = signal(this.defaultFromDate());
@@ -692,6 +896,82 @@ export class StationProfileComponent implements OnInit {
 
   stopCharging(id: string): void {
     this.store.stopCharging(id).subscribe();
+  }
+
+  // --- D6: Edit Station ---
+  openEditStation(): void {
+    const s = this.station();
+    if (!s) return;
+    this.editStationName.set(s.Name ?? '');
+    this.editStationAddress.set(s.Address ?? '');
+    this.editStationType.set(s.Type);
+    this.editStationSubType.set(s.SubType);
+    this.showEditStation.set(true);
+  }
+
+  saveStationEdit(): void {
+    this.showEditStation.set(false);
+    this.store.updateStation(this.stationId(), {
+      Name: this.editStationName(),
+      Address: this.editStationAddress(),
+      Type: this.editStationType(),
+      SubType: this.editStationSubType(),
+    }).subscribe();
+  }
+
+  // --- D7: Delete Station ---
+  confirmDeleteStation(): void {
+    this.showDeleteStation.set(false);
+    this.store.deleteStation(this.stationId()).subscribe({
+      next: () => this.router.navigate(['/dashboard']),
+    });
+  }
+
+  // --- D8: Get/Set Config ---
+  openGetConfig(): void {
+    this.configKey.set('');
+    this.configResult.set(null);
+    this.configLoading.set(false);
+    this.showGetConfig.set(true);
+  }
+
+  openSetConfig(): void {
+    this.configKey.set('');
+    this.configValue.set('');
+    this.configLoading.set(false);
+    this.showSetConfig.set(true);
+  }
+
+  executeGetConfig(): void {
+    const key = this.configKey().trim();
+    if (!key) return;
+    this.configLoading.set(true);
+    this.configResult.set(null);
+    this.store.getOcppConfig(this.stationId(), key).subscribe({
+      next: (res) => {
+        this.configResult.set(res.Value || 'Key not found or empty');
+        this.configLoading.set(false);
+      },
+      error: () => {
+        this.configResult.set('Error: failed to get configuration');
+        this.configLoading.set(false);
+      },
+    });
+  }
+
+  executeSetConfig(): void {
+    const key = this.configKey().trim();
+    if (!key) return;
+    this.configLoading.set(true);
+    this.store.setOcppConfig(this.stationId(), key, this.configValue()).subscribe({
+      next: () => {
+        this.configLoading.set(false);
+        this.showSetConfig.set(false);
+      },
+      error: () => {
+        this.configLoading.set(false);
+      },
+    });
   }
 
   goToOwner(): void {

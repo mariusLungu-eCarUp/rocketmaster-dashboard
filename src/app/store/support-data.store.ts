@@ -214,8 +214,8 @@ export class SupportDataStore {
 
   // --- Station Actions ---
 
-  getOcppConfig(stationId: string, key: string): Observable<{ value: string }> {
-    return this.http.get<{ value: string }>(
+  getOcppConfig(stationId: string, key: string): Observable<{ Value: string }> {
+    return this.http.get<{ Value: string }>(
       `${environment.apiBaseUrl}/api/rocketmaster/stations/${stationId}/configuration?key=${encodeURIComponent(key)}`,
     );
   }
@@ -223,7 +223,7 @@ export class SupportDataStore {
   setOcppConfig(stationId: string, key: string, value: string): Observable<void> {
     return this.http.post<void>(
       `${environment.apiBaseUrl}/api/rocketmaster/stations/${stationId}/configuration`,
-      { key, value },
+      { Key: key, Value: value },
     );
   }
 
@@ -254,7 +254,7 @@ export class SupportDataStore {
     return this.http.get<OcppLogEntry[]>(url);
   }
 
-  updateStation(stationId: string, dto: { Name?: string; Address?: string; Type?: string; SubType?: string }): Observable<void> {
+  updateStation(stationId: string, dto: { Name?: string; Address?: string; Type?: number; SubType?: number }): Observable<void> {
     return this.http
       .patch<void>(
         `${environment.apiBaseUrl}/api/rocketmaster/stations/${stationId}`,

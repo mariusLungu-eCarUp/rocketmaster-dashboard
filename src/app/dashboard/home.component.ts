@@ -11,7 +11,7 @@ import { IconComponent } from '../shared/icon.component';
   changeDetection: ChangeDetectionStrategy.OnPush,
   encapsulation: ViewEncapsulation.None,
   template: `
-    <div class="flex flex-col gap-5 p-5 pb-10" style="max-width: 1200px">
+    <div class="flex flex-col gap-5 p-5 pb-10" style="max-width: 100%">
       <!-- Header -->
       <div class="flex items-baseline justify-between">
         <div>
