@@ -75,6 +75,7 @@ The application uses basic authentication with credentials stored in sessionStor
 
 ## Environments
 
-- **Development:** Points to `https://www.ecarup.com`
-- **Staging:** Points to `https://staging.ecarup.com`
-- **Production:** Points to `https://www.ecarup.com`
+- **Local (`-c local`):** Points to `http://localhost:57657`
+- **Development (default):** Points to `https://www.ecarup.com`
+- **Staging (`-c staging`):** Points to `https://staging.ecarup.com`
+- **Production (`-c production`):** Points to `https://www.ecarup.com`
