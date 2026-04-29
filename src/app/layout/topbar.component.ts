@@ -118,8 +118,18 @@ export class TopbarComponent {
 
   breadcrumbLabel(): string {
     const url = this.router.url;
-    if (url.startsWith('/driver/')) return 'Driver Profile';
-    if (url.startsWith('/station/')) return 'Station Profile';
+    if (url.startsWith('/station/')) {
+      const id = url.replace('/station/', '');
+      const station = this.store.stationById().get(id);
+      return station ? `Station: ${station.Name || id}` : 'Station';
+    }
+    if (url.startsWith('/driver/')) {
+      const id = url.replace('/driver/', '');
+      const user = this.store.userById().get(id);
+      return user ? `Driver: ${user.Identification || id}` : 'Driver';
+    }
+    if (url === '/stations') return 'Stations';
+    if (url === '/drivers') return 'Drivers';
     return '';
   }
 

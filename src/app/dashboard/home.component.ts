@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, computed, inject, OnInit, ViewEncapsulation } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject, ViewEncapsulation } from '@angular/core';
 import { SupportDataStore } from '../store/support-data.store';
 import { StatTileComponent } from './stat-tile.component';
 import { AlertCardComponent, DashboardAlert } from './alert-card.component';
@@ -47,7 +47,7 @@ import { IconComponent } from '../shared/icon.component';
     </div>
   `,
 })
-export class HomeComponent implements OnInit {
+export class HomeComponent {
   readonly store = inject(SupportDataStore);
 
   readonly today = new Date().toLocaleDateString('en-US', {
@@ -126,9 +126,4 @@ export class HomeComponent implements OnInit {
     return alerts;
   });
 
-  ngOnInit(): void {
-    if (this.store.users().length === 0 && !this.store.loading()) {
-      this.store.loadAll().subscribe();
-    }
-  }
 }

@@ -403,20 +403,20 @@ const OCPP_CONFIG_KEYS = [
                           [style.transform]="expandedLogIndex() === $index ? 'rotate(90deg)' : 'none'"
                           [style.transition]="'transform 0.15s'" />
                       </td>
-                      <td class="px-3 py-1.5 text-xs font-mono whitespace-nowrap" style="border-bottom: 1px solid #E2E8F0; color: #3B566B">{{ log.timestamp }}</td>
+                      <td class="px-3 py-1.5 text-xs font-mono whitespace-nowrap" style="border-bottom: 1px solid #E2E8F0; color: #3B566B">{{ log.Timestamp }}</td>
                       <td class="px-3 py-1.5 text-xs" style="border-bottom: 1px solid #E2E8F0">
                         <span class="inline-flex items-center text-xs font-medium px-1.5 py-0.5 rounded"
-                          [style.color]="log.direction === 'IN' ? '#059669' : '#03A9F4'"
-                          [style.background]="log.direction === 'IN' ? '#ECFDF5' : '#E1F5FE'">
-                          {{ log.direction }}
+                          [style.color]="log.Direction === 'IN' ? '#059669' : '#03A9F4'"
+                          [style.background]="log.Direction === 'IN' ? '#ECFDF5' : '#E1F5FE'">
+                          {{ log.Direction }}
                         </span>
                       </td>
-                      <td class="px-3 py-1.5 text-xs font-medium" style="border-bottom: 1px solid #E2E8F0; color: #000000">{{ log.action }}</td>
+                      <td class="px-3 py-1.5 text-xs font-medium" style="border-bottom: 1px solid #E2E8F0; color: #000000">{{ log.Action }}</td>
                     </tr>
                     @if (expandedLogIndex() === $index) {
                       <tr>
                         <td colspan="4" style="background: #F4F4F4; border-bottom: 1px solid #E2E8F0; padding: 12px 16px">
-                          <pre class="text-xs font-mono whitespace-pre-wrap" style="color: #3B566B; margin: 0; max-height: 300px; overflow-y: auto">{{ formatPayload(log.payload) }}</pre>
+                          <pre class="text-xs font-mono whitespace-pre-wrap" style="color: #3B566B; margin: 0; max-height: 300px; overflow-y: auto">{{ formatPayload(log.Payload) }}</pre>
                         </td>
                       </tr>
                     }
@@ -650,7 +650,7 @@ export class StationProfileComponent implements OnInit {
 
   // --- B3: Log filtering ---
   readonly logActionTypes = computed(() => {
-    const actions = new Set(this.logs().map((l) => l.action));
+    const actions = new Set(this.logs().map((l) => l.Action));
     return Array.from(actions).sort();
   });
 
@@ -660,15 +660,15 @@ export class StationProfileComponent implements OnInit {
     const actionFilter = this.logActionFilter();
 
     if (actionFilter) {
-      result = result.filter((l) => l.action === actionFilter);
+      result = result.filter((l) => l.Action === actionFilter);
     }
     if (search) {
       result = result.filter(
         (l) =>
-          l.action.toLowerCase().includes(search) ||
-          l.direction.toLowerCase().includes(search) ||
-          l.timestamp.toLowerCase().includes(search) ||
-          JSON.stringify(l.payload).toLowerCase().includes(search),
+          l.Action.toLowerCase().includes(search) ||
+          l.Direction.toLowerCase().includes(search) ||
+          l.Timestamp.toLowerCase().includes(search) ||
+          JSON.stringify(l.Payload).toLowerCase().includes(search),
       );
     }
     return result;
@@ -678,11 +678,11 @@ export class StationProfileComponent implements OnInit {
   readonly connectorDiagnostics = computed<Map<number, ConnectorDiagnostic>>(() => {
     const map = new Map<number, ConnectorDiagnostic>();
     const statusLogs = this.logs()
-      .filter((l) => l.action === 'StatusNotification')
+      .filter((l) => l.Action === 'StatusNotification')
       .reverse();
 
     for (const log of statusLogs) {
-      const p = parseOcppPayload<StatusNotificationPayload>(log.payload, [
+      const p = parseOcppPayload<StatusNotificationPayload>(log.Payload, [
         'connectorId',
         'status',
         'errorCode',
@@ -694,7 +694,7 @@ export class StationProfileComponent implements OnInit {
         errorCode: p.errorCode ?? 'NoError',
         info: p.info ?? '',
         vendorErrorCode: p.vendorErrorCode ?? '',
-        timestamp: p.timestamp ?? log.timestamp,
+        timestamp: p.timestamp ?? log.Timestamp,
       });
     }
     return map;
@@ -712,11 +712,11 @@ export class StationProfileComponent implements OnInit {
 
   // --- B2: Heartbeat connectivity ---
   readonly heartbeatInfo = computed<HeartbeatInfo | null>(() => {
-    const heartbeats = this.logs().filter((l) => l.action === 'Heartbeat');
+    const heartbeats = this.logs().filter((l) => l.Action === 'Heartbeat');
     if (heartbeats.length === 0) return null;
 
     const latest = heartbeats[0];
-    const lastSeen = new Date(latest.timestamp);
+    const lastSeen = new Date(latest.Timestamp);
     const ageMs = Date.now() - lastSeen.getTime();
 
     const label = this.formatAge(ageMs);
@@ -751,14 +751,14 @@ export class StationProfileComponent implements OnInit {
   // --- B4: Stop reasons ---
   readonly stopReasons = computed<Map<string, string>>(() => {
     const map = new Map<string, string>();
-    const stopLogs = this.logs().filter((l) => l.action === 'StopTransaction');
+    const stopLogs = this.logs().filter((l) => l.Action === 'StopTransaction');
     for (const log of stopLogs) {
-      const p = parseOcppPayload<StopTransactionPayload>(log.payload, [
+      const p = parseOcppPayload<StopTransactionPayload>(log.Payload, [
         'reason',
         'transactionId',
       ]);
       if (!p) continue;
-      const key = p.transactionId != null ? String(p.transactionId) : log.timestamp;
+      const key = p.transactionId != null ? String(p.transactionId) : log.Timestamp;
       if (p.reason) {
         map.set(key, p.reason);
       }
@@ -859,7 +859,7 @@ export class StationProfileComponent implements OnInit {
       rows
         .map(
           (l) =>
-            `"${l.timestamp}","${l.direction}","${l.action}","${JSON.stringify(l.payload).replace(/"/g, '""')}"`,
+            `"${l.Timestamp}","${l.Direction}","${l.Action}","${JSON.stringify(l.Payload).replace(/"/g, '""')}"`,
         )
         .join('\n');
 
@@ -873,7 +873,7 @@ export class StationProfileComponent implements OnInit {
   }
 
   private defaultFromDate(): string {
-    const d = new Date(Date.now() - 86400000);
+    const d = new Date(Date.now() - 7 * 86400000);
     return d.toISOString().slice(0, 10);
   }
 

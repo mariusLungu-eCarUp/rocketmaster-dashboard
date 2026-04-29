@@ -5,6 +5,8 @@ import { ShellComponent } from './layout/shell.component';
 import { HomeComponent } from './dashboard/home.component';
 import { StationProfileComponent } from './station/station-profile.component';
 import { DriverProfileComponent } from './driver/driver-profile.component';
+import { StationsListComponent } from './stations/stations-list.component';
+import { DriversListComponent } from './drivers/drivers-list.component';
 
 export const routes: Routes = [
   { path: 'login', component: LoginComponent },
@@ -15,6 +17,8 @@ export const routes: Routes = [
     children: [
       { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
       { path: 'dashboard', component: HomeComponent },
+      { path: 'stations', component: StationsListComponent },
+      { path: 'drivers', component: DriversListComponent },
       { path: 'station/:stationId', component: StationProfileComponent },
       { path: 'driver/:userId', component: DriverProfileComponent },
     ],

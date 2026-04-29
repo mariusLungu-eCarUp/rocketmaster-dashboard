@@ -163,10 +163,10 @@ export interface Permission {
 }
 
 export interface OcppLogEntry {
-  timestamp: string;
-  direction: string;
-  action: string;
-  payload: unknown;
+  Timestamp: string;
+  Direction: string;
+  Action: string;
+  Payload: unknown;
 }
 
 // --- OCPP Payload Types (for diagnostic parsing) ---

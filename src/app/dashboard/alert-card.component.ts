@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, input, output, ViewEncapsulation } from '@angular/core';
+import { ChangeDetectionStrategy, Component, input, signal, ViewEncapsulation } from '@angular/core';
 import { Router } from '@angular/router';
 import { inject } from '@angular/core';
 
@@ -65,7 +65,7 @@ export interface DashboardAlert {
 
       @if (alert().items.length > 0) {
         <div class="flex gap-1 flex-wrap" style="margin-left: 18px">
-          @for (item of alert().items.slice(0, 4); track item.id) {
+          @for (item of (expanded() ? alert().items : alert().items.slice(0, 4)); track item.id) {
             <span
               class="text-xs font-medium px-2 py-0.5 rounded cursor-pointer"
               style="color: #03A9F4; background: #E1F5FE; border: 1px solid #B3E5FC"
@@ -75,8 +75,10 @@ export interface DashboardAlert {
             </span>
           }
           @if (alert().items.length > 4) {
-            <span class="text-xs font-medium px-2 py-0.5 rounded" style="color: #3B566B; background: #E2E8F0; border: 1px solid #E2E8F0">
-              +{{ alert().items.length - 4 }} more
+            <span class="text-xs font-medium px-2 py-0.5 rounded cursor-pointer"
+              style="color: #3B566B; background: #E2E8F0; border: 1px solid #E2E8F0"
+              (click)="expanded.set(!expanded()); $event.stopPropagation()">
+              {{ expanded() ? 'Show less' : '+' + (alert().items.length - 4) + ' more' }}
             </span>
           }
         </div>
@@ -88,6 +90,7 @@ export class AlertCardComponent {
   private readonly router = inject(Router);
 
   readonly alert = input.required<DashboardAlert>();
+  readonly expanded = signal(false);
 
   accentColor(): string {
     const s = this.alert().severity;

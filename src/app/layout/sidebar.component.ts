@@ -55,11 +55,14 @@ export class SidebarComponent {
 
   readonly navItems: NavItem[] = [
     { id: 'home', label: 'Dashboard', icon: 'home', route: '/dashboard' },
-    { id: 'stations', label: 'Stations', icon: 'zap', route: '/dashboard' },
-    { id: 'drivers', label: 'Drivers', icon: 'users', route: '/dashboard' },
+    { id: 'stations', label: 'Stations', icon: 'zap', route: '/stations' },
+    { id: 'drivers', label: 'Drivers', icon: 'users', route: '/drivers' },
   ];
 
   isActive(route: string): boolean {
-    return this.router.url === route || this.router.url.startsWith(route + '/');
+    const url = this.router.url;
+    if (route === '/stations') return url === '/stations' || url.startsWith('/station/');
+    if (route === '/drivers') return url === '/drivers' || url.startsWith('/driver/');
+    return url === route;
   }
 }
