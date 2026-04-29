@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, inject, OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject, OnDestroy, OnInit } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
 import { SidebarComponent } from './sidebar.component';
 import { TopbarComponent } from './topbar.component';
@@ -25,12 +25,24 @@ import { SupportDataStore } from '../store/support-data.store';
     <app-toast-container />
   `,
 })
-export class ShellComponent implements OnInit {
+export class ShellComponent implements OnInit, OnDestroy {
   private readonly store = inject(SupportDataStore);
+  private refreshTimer: ReturnType<typeof setInterval> | null = null;
 
   ngOnInit(): void {
     if (this.store.users().length === 0 && !this.store.loading()) {
       this.store.loadAll().subscribe();
+    }
+    this.refreshTimer = setInterval(() => {
+      if (!this.store.loading()) {
+        this.store.loadAll().subscribe();
+      }
+    }, 30_000);
+  }
+
+  ngOnDestroy(): void {
+    if (this.refreshTimer) {
+      clearInterval(this.refreshTimer);
     }
   }
 }

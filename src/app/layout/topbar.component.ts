@@ -87,6 +87,8 @@ import { IconComponent } from '../shared/icon.component';
       <div class="flex items-center gap-2 shrink-0">
         @if (store.loading()) {
           <span class="text-xs" style="color: #3B566B">Loading...</span>
+        } @else if (store.lastUpdated()) {
+          <span class="text-xs" style="color: #3B566B" title="Auto-refreshes every 30s">Updated {{ formatLastUpdated() }}</span>
         }
         <button
           (click)="reload()"
@@ -172,6 +174,12 @@ export class TopbarComponent {
   logout(): void {
     this.auth.logout();
     this.router.navigate(['/login']);
+  }
+
+  formatLastUpdated(): string {
+    const d = this.store.lastUpdated();
+    if (!d) return '';
+    return d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
   }
 
   goHome(): void {

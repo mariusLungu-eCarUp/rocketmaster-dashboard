@@ -4,9 +4,12 @@ import { Observable, catchError, forkJoin, map, tap } from 'rxjs';
 import { environment } from '../../environments/environment';
 import {
   AdminChargingDto,
+  AdminPricePlanDto,
+  AdminPriceRuleDto,
   AdminRfidCardData,
   AdminStationDto,
   CarId,
+  HubjectPricingProduct,
   License,
   OcppLogEntry,
   Permission,
@@ -25,6 +28,7 @@ export class SupportDataStore {
   readonly permissions = signal<Permission[]>([]);
   readonly loading = signal(false);
   readonly error = signal<string | null>(null);
+  readonly lastUpdated = signal<Date | null>(null);
 
   // --- Lookup Maps ---
 
@@ -118,6 +122,7 @@ export class SupportDataStore {
         this.chargings.set(data.chargings);
         this.permissions.set(data.permissions);
         this.loading.set(false);
+        this.lastUpdated.set(new Date());
       }),
       map(() => void 0),
       catchError((err: unknown) => {
@@ -295,5 +300,76 @@ export class SupportDataStore {
         `${environment.apiBaseUrl}/api/rocketmaster/charging/${chargingId}`,
       )
       .pipe(tap(() => this.loadAll().subscribe()));
+  }
+
+  // --- Price Plans ---
+
+  getPricePlans(): Observable<AdminPricePlanDto[]> {
+    return this.http.get<AdminPricePlanDto[]>(
+      `${environment.apiBaseUrl}/api/rocketmaster/price-plans`,
+    );
+  }
+
+  deletePricePlan(pricePlanId: string): Observable<void> {
+    return this.http.delete<void>(
+      `${environment.apiBaseUrl}/api/rocketmaster/price-plans/${pricePlanId}`,
+    );
+  }
+
+  // --- Price Rules ---
+
+  getPriceRules(): Observable<AdminPriceRuleDto[]> {
+    return this.http.get<AdminPriceRuleDto[]>(
+      `${environment.apiBaseUrl}/api/rocketmaster/price-rules`,
+    );
+  }
+
+  deletePriceRule(priceRuleId: string): Observable<void> {
+    return this.http.delete<void>(
+      `${environment.apiBaseUrl}/api/rocketmaster/price-rules/${priceRuleId}`,
+    );
+  }
+
+  // --- Hubject ---
+
+  getHubjectPricingProducts(): Observable<HubjectPricingProduct[]> {
+    return this.http.get<HubjectPricingProduct[]>(
+      `${environment.apiBaseUrl}/api/rocketmaster/hubject/pricing/products`,
+    );
+  }
+
+  pushHubjectEvseData(): Observable<void> {
+    return this.http.post<void>(
+      `${environment.apiBaseUrl}/api/rocketmaster/hubject/data`,
+      {},
+    );
+  }
+
+  pushHubjectEvseStatus(): Observable<void> {
+    return this.http.post<void>(
+      `${environment.apiBaseUrl}/api/rocketmaster/hubject/status`,
+      {},
+    );
+  }
+
+  pushHubjectPricingProducts(): Observable<void> {
+    return this.http.post<void>(
+      `${environment.apiBaseUrl}/api/rocketmaster/hubject/pricing/products`,
+      {},
+    );
+  }
+
+  pushHubjectPricing(): Observable<void> {
+    return this.http.post<void>(
+      `${environment.apiBaseUrl}/api/rocketmaster/hubject/pricing`,
+      {},
+    );
+  }
+
+  sendHubjectCdr(sessionId: string, hubjectUserId: string, date: string): Observable<void> {
+    return this.http.put<void>(
+      `${environment.apiBaseUrl}/api/rocketmaster/hubject/cdrs/${sessionId}`,
+      { HubjectUserId: hubjectUserId, Date: date },
+    );
   }
 }

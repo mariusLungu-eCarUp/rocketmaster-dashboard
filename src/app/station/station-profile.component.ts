@@ -4,6 +4,7 @@ import { SupportDataStore } from '../store/support-data.store';
 import { StatusBadgeComponent } from '../shared/status-badge.component';
 import { ConfirmDialogComponent } from '../shared/confirm-dialog.component';
 import { IconComponent } from '../shared/icon.component';
+import { ToastService } from '../shared/toast.service';
 import {
   AdminConnectorDto,
   StationState,
@@ -587,6 +588,7 @@ const OCPP_CONFIG_KEYS = [
 export class StationProfileComponent implements OnInit {
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
+  private readonly toast = inject(ToastService);
   readonly store = inject(SupportDataStore);
 
   readonly stationId = signal('');
@@ -882,20 +884,32 @@ export class StationProfileComponent implements OnInit {
   }
 
   softReset(): void {
-    this.store.resetStation(this.stationId(), true).subscribe();
+    this.store.resetStation(this.stationId(), true).subscribe({
+      next: () => this.toast.success('Soft reset sent'),
+      error: () => this.toast.error('Soft reset failed'),
+    });
   }
 
   hardReset(): void {
     this.showHardReset.set(false);
-    this.store.resetStation(this.stationId(), false).subscribe();
+    this.store.resetStation(this.stationId(), false).subscribe({
+      next: () => this.toast.success('Hard reset sent'),
+      error: () => this.toast.error('Hard reset failed'),
+    });
   }
 
   unlockConnector(position: number): void {
-    this.store.unlockConnector(this.stationId(), position).subscribe();
+    this.store.unlockConnector(this.stationId(), position).subscribe({
+      next: () => this.toast.success(`Connector ${position} unlocked`),
+      error: () => this.toast.error(`Failed to unlock connector ${position}`),
+    });
   }
 
   stopCharging(id: string): void {
-    this.store.stopCharging(id).subscribe();
+    this.store.stopCharging(id).subscribe({
+      next: () => this.toast.success('Charging session stopped'),
+      error: () => this.toast.error('Failed to stop charging'),
+    });
   }
 
   // --- D6: Edit Station ---
@@ -916,14 +930,18 @@ export class StationProfileComponent implements OnInit {
       Address: this.editStationAddress(),
       Type: this.editStationType(),
       SubType: this.editStationSubType(),
-    }).subscribe();
+    }).subscribe({
+      next: () => this.toast.success('Station updated'),
+      error: () => this.toast.error('Failed to update station'),
+    });
   }
 
   // --- D7: Delete Station ---
   confirmDeleteStation(): void {
     this.showDeleteStation.set(false);
     this.store.deleteStation(this.stationId()).subscribe({
-      next: () => this.router.navigate(['/dashboard']),
+      next: () => { this.toast.success('Station deleted'); this.router.navigate(['/dashboard']); },
+      error: () => this.toast.error('Failed to delete station'),
     });
   }
 
@@ -955,6 +973,7 @@ export class StationProfileComponent implements OnInit {
       error: () => {
         this.configResult.set('Error: failed to get configuration');
         this.configLoading.set(false);
+        this.toast.error('Failed to get configuration');
       },
     });
   }
@@ -967,9 +986,11 @@ export class StationProfileComponent implements OnInit {
       next: () => {
         this.configLoading.set(false);
         this.showSetConfig.set(false);
+        this.toast.success('Configuration updated');
       },
       error: () => {
         this.configLoading.set(false);
+        this.toast.error('Failed to set configuration');
       },
     });
   }

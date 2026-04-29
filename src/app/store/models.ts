@@ -216,3 +216,51 @@ export interface HeartbeatInfo {
   label: string;
   level: 'green' | 'yellow' | 'red';
 }
+
+// --- Phase F: Price Plans, Price Rules, Hubject ---
+
+export interface AdminPricePlanDto {
+  Id: string;
+  Name: string;
+  Description: string | null;
+  OwnerId: string;
+  ValidFrom: string;
+  ValidUntil: string | null;
+  IsDefault: boolean;
+  IsDeleted: boolean;
+  HasBeenUsed: boolean;
+  Status: string;
+  CreatedBy: string | null;
+  CreatedAt: string;
+  UpdatedBy: string | null;
+  UpdatedAt: string | null;
+  DeletedBy: string | null;
+  DeletedAt: string | null;
+}
+
+export interface AdminPriceRuleDto {
+  Id: string;
+  ProductType: string;
+  Mode: string;
+  PriceAssigneeType: string;
+  PriceAssigneeId: string;
+  TargetType: string;
+  TargetId: string;
+  Price: number;
+  Currency: string;
+  CreatedAt: number; // Unix timestamp
+  CreatedBy: string;
+}
+
+export interface HubjectPricingProduct {
+  ProductID: string;
+  PricePerReferenceUnit: number;
+  ProductPriceCurrency: string;
+  ReferenceUnit: string;
+}
+
+export interface SendHubjectCdrDto {
+  SessionId: string;
+  HubjectUserId: string;
+  Date: string;
+}

@@ -3,7 +3,8 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { SupportDataStore } from '../store/support-data.store';
 import { ConfirmDialogComponent } from '../shared/confirm-dialog.component';
 import { IconComponent } from '../shared/icon.component';
-import { License } from '../store/models';
+import { ToastService } from '../shared/toast.service';
+import { AdminPricePlanDto, License } from '../store/models';
 
 const FEATURE_GROUPS: { label: string; features: string[] }[] = [
   {
@@ -206,6 +207,61 @@ const MONTH_NAMES = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Se
           }
         </div>
 
+        <!-- Price Plans -->
+        <div class="bg-white" style="border: 1px solid #E2E8F0; border-radius: 6px; padding: 16px 20px">
+          <div class="flex items-center justify-between mb-3">
+            <span class="text-xs font-semibold uppercase tracking-wider" style="color: #3B566B">Price Plans</span>
+            <span class="text-xs" style="color: #3B566B">{{ userPricePlans().length }} plan(s)</span>
+          </div>
+          @if (pricePlansLoading()) {
+            <p class="text-xs text-center py-4" style="color: #3B566B">Loading...</p>
+          } @else if (userPricePlans().length === 0) {
+            <p class="text-xs text-center py-4" style="color: #3B566B">No price plans</p>
+          } @else {
+            <div class="overflow-x-auto">
+              <table class="w-full" style="border-collapse: collapse">
+                <thead>
+                  <tr style="background: #F4F4F4">
+                    <th class="text-left text-xs font-semibold uppercase tracking-wider px-3 py-2" style="color: #3B566B; border-bottom: 1px solid #E2E8F0">Name</th>
+                    <th class="text-left text-xs font-semibold uppercase tracking-wider px-3 py-2" style="color: #3B566B; border-bottom: 1px solid #E2E8F0">Valid From</th>
+                    <th class="text-left text-xs font-semibold uppercase tracking-wider px-3 py-2" style="color: #3B566B; border-bottom: 1px solid #E2E8F0">Valid Until</th>
+                    <th class="text-left text-xs font-semibold uppercase tracking-wider px-3 py-2" style="color: #3B566B; border-bottom: 1px solid #E2E8F0">Default</th>
+                    <th class="text-left text-xs font-semibold uppercase tracking-wider px-3 py-2" style="color: #3B566B; border-bottom: 1px solid #E2E8F0">Status</th>
+                    <th class="text-right text-xs font-semibold uppercase tracking-wider px-3 py-2" style="color: #3B566B; border-bottom: 1px solid #E2E8F0">Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  @for (p of userPricePlans(); track p.Id) {
+                    <tr>
+                      <td class="px-3 py-2 text-sm font-medium" style="border-bottom: 1px solid #E2E8F0">{{ p.Name }}</td>
+                      <td class="px-3 py-2 text-sm" style="border-bottom: 1px solid #E2E8F0">{{ formatDate(p.ValidFrom) }}</td>
+                      <td class="px-3 py-2 text-sm" style="border-bottom: 1px solid #E2E8F0">{{ p.ValidUntil ? formatDate(p.ValidUntil) : 'No end date' }}</td>
+                      <td class="px-3 py-2" style="border-bottom: 1px solid #E2E8F0">
+                        @if (p.IsDefault) {
+                          <span class="text-xs font-semibold px-2 py-0.5 rounded-full" style="color: #03A9F4; background: #E1F5FE">Yes</span>
+                        } @else {
+                          <span class="text-xs" style="color: #3B566B">No</span>
+                        }
+                      </td>
+                      <td class="px-3 py-2" style="border-bottom: 1px solid #E2E8F0">
+                        <span class="text-xs font-semibold px-2 py-0.5 rounded-full"
+                          [style.color]="isPricePlanActive(p) ? '#059669' : '#3B566B'"
+                          [style.background]="isPricePlanActive(p) ? '#ECFDF5' : '#F1F5F9'">
+                          {{ isPricePlanActive(p) ? 'Active' : 'Inactive' }}
+                        </span>
+                      </td>
+                      <td class="px-3 py-2 text-right" style="border-bottom: 1px solid #E2E8F0">
+                        <button class="text-xs font-medium px-2 py-1 rounded cursor-pointer" style="color: #DC2626; border: 1px solid #FECACA"
+                          (click)="deletingPricePlanId.set(p.Id); deletingPricePlanIsDefault.set(p.IsDefault); showDeletePricePlan.set(true)">Delete</button>
+                      </td>
+                    </tr>
+                  }
+                </tbody>
+              </table>
+            </div>
+          }
+        </div>
+
         <!-- RFID Cards -->
         <div class="bg-white" style="border: 1px solid #E2E8F0; border-radius: 6px; padding: 16px 20px">
           <span class="text-xs font-semibold uppercase tracking-wider" style="color: #3B566B">RFID Cards</span>
@@ -322,6 +378,17 @@ const MONTH_NAMES = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Se
             confirmLabel="Delete"
             (confirmed)="confirmDeleteLicense()"
             (cancelled)="showDeleteLicense.set(false)"
+          />
+        }
+
+        <!-- F1: Delete Price Plan Confirm -->
+        @if (showDeletePricePlan()) {
+          <app-confirm-dialog
+            title="Delete Price Plan"
+            [message]="deletingPricePlanIsDefault() ? 'This is a default price plan. Deleting it may affect all users without a specific plan. Are you sure?' : 'Are you sure you want to delete this price plan?'"
+            confirmLabel="Delete"
+            (confirmed)="confirmDeletePricePlan()"
+            (cancelled)="showDeletePricePlan.set(false)"
           />
         }
 
@@ -513,6 +580,7 @@ const MONTH_NAMES = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Se
 export class DriverProfileComponent implements OnInit {
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
+  private readonly toast = inject(ToastService);
   readonly store = inject(SupportDataStore);
 
   readonly userId = signal('');
@@ -552,6 +620,17 @@ export class DriverProfileComponent implements OnInit {
   readonly showDeleteLicense = signal(false);
   readonly deletingLicenseId = signal('');
 
+  // --- F1: Price Plans ---
+  readonly pricePlans = signal<AdminPricePlanDto[]>([]);
+  readonly pricePlansLoading = signal(false);
+  readonly showDeletePricePlan = signal(false);
+  readonly deletingPricePlanId = signal('');
+  readonly deletingPricePlanIsDefault = signal(false);
+
+  readonly userPricePlans = computed(() =>
+    this.pricePlans().filter((p) => p.OwnerId === this.userId() && !p.IsDeleted),
+  );
+
   readonly user = computed(() => this.store.userById().get(this.userId()));
   readonly activeSessions = computed(() => this.store.chargingsByDriverId().get(this.userId()) ?? []);
   readonly rfidCards = computed(() => this.store.rfidCardsByUserId().get(this.userId()) ?? []);
@@ -562,6 +641,7 @@ export class DriverProfileComponent implements OnInit {
     this.route.params.subscribe((params) => {
       this.userId.set(params['userId']);
       this.loadLicenses();
+      this.loadPricePlans();
     });
   }
 
@@ -594,21 +674,31 @@ export class DriverProfileComponent implements OnInit {
   }
 
   stopCharging(id: string): void {
-    this.store.stopCharging(id).subscribe();
+    this.store.stopCharging(id).subscribe({
+      next: () => this.toast.success('Charging session stopped'),
+      error: () => this.toast.error('Failed to stop charging'),
+    });
   }
 
   deleteRfid(id: string): void {
-    this.store.deleteRfidCard(id).subscribe();
+    this.store.deleteRfidCard(id).subscribe({
+      next: () => this.toast.success('RFID card deleted'),
+      error: () => this.toast.error('Failed to delete RFID card'),
+    });
   }
 
   deleteCarId(id: string): void {
-    this.store.deleteCarId(id).subscribe();
+    this.store.deleteCarId(id).subscribe({
+      next: () => this.toast.success('Car ID deleted'),
+      error: () => this.toast.error('Failed to delete car ID'),
+    });
   }
 
   deleteUser(): void {
     this.showDeleteConfirm.set(false);
     this.store.deleteUser(this.userId()).subscribe({
-      next: () => this.router.navigate(['/dashboard']),
+      next: () => { this.toast.success('User deleted'); this.router.navigate(['/dashboard']); },
+      error: () => this.toast.error('Failed to delete user'),
     });
   }
 
@@ -629,7 +719,10 @@ export class DriverProfileComponent implements OnInit {
   saveFeatures(): void {
     this.showEditFeatures.set(false);
     const features = Array.from(this.selectedFeatures()).map((t) => ({ Type: t }));
-    this.store.setFeatures(this.userId(), features).subscribe();
+    this.store.setFeatures(this.userId(), features).subscribe({
+      next: () => this.toast.success('Features updated'),
+      error: () => this.toast.error('Failed to update features'),
+    });
   }
 
   // --- D2: Change Email ---
@@ -640,13 +733,19 @@ export class DriverProfileComponent implements OnInit {
 
   saveChangeEmail(): void {
     this.showChangeEmail.set(false);
-    this.store.changeEmail(this.userId(), this.newEmail()).subscribe();
+    this.store.changeEmail(this.userId(), this.newEmail()).subscribe({
+      next: () => this.toast.success('Email changed'),
+      error: () => this.toast.error('Failed to change email'),
+    });
   }
 
   // --- D3: Cancel Payment ---
   confirmCancelPayment(): void {
     this.showCancelPayment.set(false);
-    this.store.cancelPayment(this.userId()).subscribe();
+    this.store.cancelPayment(this.userId()).subscribe({
+      next: () => this.toast.success('Payment cancelled'),
+      error: () => this.toast.error('Failed to cancel payment'),
+    });
   }
 
   // --- D4: Resend Monthly Overview ---
@@ -660,7 +759,10 @@ export class DriverProfileComponent implements OnInit {
   sendOverview(): void {
     this.showResendOverview.set(false);
     const sendTo = this.overviewSendTo().trim() || undefined;
-    this.store.sendMonthlyOverview(this.userId(), this.overviewYear(), this.overviewMonth(), sendTo).subscribe();
+    this.store.sendMonthlyOverview(this.userId(), this.overviewYear(), this.overviewMonth(), sendTo).subscribe({
+      next: () => this.toast.success('Monthly overview sent'),
+      error: () => this.toast.error('Failed to send monthly overview'),
+    });
   }
 
   // --- D5: License Management ---
@@ -697,7 +799,10 @@ export class DriverProfileComponent implements OnInit {
     const obs = id
       ? this.store.updateLicense(this.userId(), id, dto)
       : this.store.addLicense(this.userId(), dto as { tier: string; quantity: number; startDate: string; endDate: string });
-    obs.subscribe({ next: () => this.loadLicenses() });
+    obs.subscribe({
+      next: () => { this.toast.success(id ? 'License updated' : 'License added'); this.loadLicenses(); },
+      error: () => this.toast.error('Failed to save license'),
+    });
   }
 
   confirmDeleteLicense(): void {
@@ -705,7 +810,8 @@ export class DriverProfileComponent implements OnInit {
     const id = this.deletingLicenseId();
     if (!id) return;
     this.store.deleteLicense(this.userId(), id).subscribe({
-      next: () => this.loadLicenses(),
+      next: () => { this.toast.success('License deleted'); this.loadLicenses(); },
+      error: () => this.toast.error('Failed to delete license'),
     });
   }
 
@@ -719,6 +825,33 @@ export class DriverProfileComponent implements OnInit {
     const d = new Date(date);
     d.setMonth(d.getMonth() + months);
     return d;
+  }
+
+  // --- F1: Price Plans ---
+  loadPricePlans(): void {
+    this.pricePlansLoading.set(true);
+    this.store.getPricePlans().subscribe({
+      next: (plans) => { this.pricePlans.set(plans); this.pricePlansLoading.set(false); },
+      error: () => { this.pricePlans.set([]); this.pricePlansLoading.set(false); },
+    });
+  }
+
+  isPricePlanActive(plan: AdminPricePlanDto): boolean {
+    const now = new Date();
+    const from = new Date(plan.ValidFrom);
+    if (now < from) return false;
+    if (!plan.ValidUntil) return true;
+    return now < new Date(plan.ValidUntil);
+  }
+
+  confirmDeletePricePlan(): void {
+    this.showDeletePricePlan.set(false);
+    const id = this.deletingPricePlanId();
+    if (!id) return;
+    this.store.deletePricePlan(id).subscribe({
+      next: () => { this.toast.success('Price plan deleted'); this.loadPricePlans(); },
+      error: () => this.toast.error('Failed to delete price plan'),
+    });
   }
 
   goToStation(id: string): void {
