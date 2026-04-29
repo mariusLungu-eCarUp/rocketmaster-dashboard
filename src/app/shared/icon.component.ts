@@ -10,6 +10,7 @@ import {
   Download, Filter, Calendar, FileText, Eye,
   Plus, Pencil, X, Send, DollarSign, Clock,
   Wifi, WifiOff,
+  Globe, Radio, Upload, Package,
 } from 'lucide';
 
 type IconNode = [string, Record<string, string | number | undefined>][];
@@ -30,6 +31,7 @@ const ICONS: Record<string, IconNode> = {
   plus: Plus, pencil: Pencil, x: X, send: Send,
   'dollar-sign': DollarSign, clock: Clock,
   wifi: Wifi, 'wifi-off': WifiOff,
+  globe: Globe, radio: Radio, upload: Upload, package: Package,
 };
 
 @Component({

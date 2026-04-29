@@ -57,6 +57,7 @@ export class SidebarComponent {
     { id: 'home', label: 'Dashboard', icon: 'home', route: '/dashboard' },
     { id: 'stations', label: 'Stations', icon: 'zap', route: '/stations' },
     { id: 'drivers', label: 'Drivers', icon: 'users', route: '/drivers' },
+    { id: 'hubject', label: 'Hubject', icon: 'globe', route: '/hubject' },
   ];
 
   isActive(route: string): boolean {

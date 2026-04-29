@@ -238,20 +238,6 @@ export interface AdminPricePlanDto {
   DeletedAt: string | null;
 }
 
-export interface AdminPriceRuleDto {
-  Id: string;
-  ProductType: string;
-  Mode: string;
-  PriceAssigneeType: string;
-  PriceAssigneeId: string;
-  TargetType: string;
-  TargetId: string;
-  Price: number;
-  Currency: string;
-  CreatedAt: number; // Unix timestamp
-  CreatedBy: string;
-}
-
 export interface HubjectPricingProduct {
   ProductID: string;
   PricePerReferenceUnit: number;

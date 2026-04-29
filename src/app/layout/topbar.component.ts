@@ -132,6 +132,7 @@ export class TopbarComponent {
     }
     if (url === '/stations') return 'Stations';
     if (url === '/drivers') return 'Drivers';
+    if (url === '/hubject') return 'Hubject Actions';
     return '';
   }
 

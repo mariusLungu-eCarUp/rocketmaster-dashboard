@@ -5,7 +5,6 @@ import { environment } from '../../environments/environment';
 import {
   AdminChargingDto,
   AdminPricePlanDto,
-  AdminPriceRuleDto,
   AdminRfidCardData,
   AdminStationDto,
   CarId,
@@ -313,20 +312,6 @@ export class SupportDataStore {
   deletePricePlan(pricePlanId: string): Observable<void> {
     return this.http.delete<void>(
       `${environment.apiBaseUrl}/api/rocketmaster/price-plans/${pricePlanId}`,
-    );
-  }
-
-  // --- Price Rules ---
-
-  getPriceRules(): Observable<AdminPriceRuleDto[]> {
-    return this.http.get<AdminPriceRuleDto[]>(
-      `${environment.apiBaseUrl}/api/rocketmaster/price-rules`,
-    );
-  }
-
-  deletePriceRule(priceRuleId: string): Observable<void> {
-    return this.http.delete<void>(
-      `${environment.apiBaseUrl}/api/rocketmaster/price-rules/${priceRuleId}`,
     );
   }
 

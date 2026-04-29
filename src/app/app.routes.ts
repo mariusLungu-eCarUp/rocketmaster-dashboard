@@ -7,6 +7,7 @@ import { StationProfileComponent } from './station/station-profile.component';
 import { DriverProfileComponent } from './driver/driver-profile.component';
 import { StationsListComponent } from './stations/stations-list.component';
 import { DriversListComponent } from './drivers/drivers-list.component';
+import { HubjectActionsComponent } from './hubject/hubject-actions.component';
 
 export const routes: Routes = [
   { path: 'login', component: LoginComponent },
@@ -19,6 +20,7 @@ export const routes: Routes = [
       { path: 'dashboard', component: HomeComponent },
       { path: 'stations', component: StationsListComponent },
       { path: 'drivers', component: DriversListComponent },
+      { path: 'hubject', component: HubjectActionsComponent },
       { path: 'station/:stationId', component: StationProfileComponent },
       { path: 'driver/:userId', component: DriverProfileComponent },
     ],
