@@ -4,7 +4,7 @@ import { SupportDataStore } from '../store/support-data.store';
 import { ConfirmDialogComponent } from '../shared/confirm-dialog.component';
 import { IconComponent } from '../shared/icon.component';
 import { ToastService } from '../shared/toast.service';
-import { AdminPricePlanDto, License } from '../store/models';
+import { AdminPricePlanDto, License, STATION_TYPE_LABELS, STATION_SUBTYPE_LABELS, StationType, StationSubType } from '../store/models';
 
 const FEATURE_GROUPS: { label: string; features: string[] }[] = [
   {
@@ -254,6 +254,43 @@ const MONTH_NAMES = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Se
                         <button class="text-xs font-medium px-2 py-1 rounded cursor-pointer" style="color: #DC2626; border: 1px solid #FECACA"
                           (click)="deletingPricePlanId.set(p.Id); deletingPricePlanIsDefault.set(p.IsDefault); showDeletePricePlan.set(true)">Delete</button>
                       </td>
+                    </tr>
+                  }
+                </tbody>
+              </table>
+            </div>
+          }
+        </div>
+
+        <!-- Stations -->
+        <div class="bg-white" style="border: 1px solid #E2E8F0; border-radius: 6px; padding: 16px 20px">
+          <div class="flex items-center justify-between mb-3">
+            <span class="text-xs font-semibold uppercase tracking-wider" style="color: #3B566B">Stations</span>
+            <span class="text-xs" style="color: #3B566B">{{ stations().length }} station(s)</span>
+          </div>
+          @if (stations().length === 0) {
+            <p class="text-xs text-center py-4" style="color: #3B566B">No stations</p>
+          } @else {
+            <div class="overflow-x-auto">
+              <table class="w-full" style="border-collapse: collapse">
+                <thead>
+                  <tr style="background: #F4F4F4">
+                    <th class="text-left text-xs font-semibold uppercase tracking-wider px-3 py-2" style="color: #3B566B; border-bottom: 1px solid #E2E8F0">Name</th>
+                    <th class="text-left text-xs font-semibold uppercase tracking-wider px-3 py-2" style="color: #3B566B; border-bottom: 1px solid #E2E8F0">Type</th>
+                    <th class="text-left text-xs font-semibold uppercase tracking-wider px-3 py-2" style="color: #3B566B; border-bottom: 1px solid #E2E8F0">Address</th>
+                    <th class="text-right text-xs font-semibold uppercase tracking-wider px-3 py-2" style="color: #3B566B; border-bottom: 1px solid #E2E8F0">Connectors</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  @for (st of stations(); track st.Id) {
+                    <tr class="cursor-pointer hover:bg-blue-50/50" (click)="goToStation(st.Id)">
+                      <td class="px-3 py-2 text-sm" style="border-bottom: 1px solid #E2E8F0">
+                        <div class="font-medium" style="color: #000">{{ st.Name || '(unnamed)' }}</div>
+                        <div class="text-xs font-mono" style="color: #3B566B">{{ st.Id }}</div>
+                      </td>
+                      <td class="px-3 py-2 text-sm" style="border-bottom: 1px solid #E2E8F0">{{ stationTypeLabel(st.Type) }} / {{ stationSubtypeLabel(st.SubType) }}</td>
+                      <td class="px-3 py-2 text-sm" style="border-bottom: 1px solid #E2E8F0">{{ st.Address || '—' }}</td>
+                      <td class="px-3 py-2 text-sm text-right" style="border-bottom: 1px solid #E2E8F0">{{ st.Connectors.length }}</td>
                     </tr>
                   }
                 </tbody>
@@ -636,6 +673,7 @@ export class DriverProfileComponent implements OnInit {
   readonly rfidCards = computed(() => this.store.rfidCardsByUserId().get(this.userId()) ?? []);
   readonly carIds = computed(() => this.store.carIdsByUserId().get(this.userId()) ?? []);
   readonly permissions = computed(() => this.store.permissionsByAssigneeId().get(this.userId()) ?? []);
+  readonly stations = computed(() => this.store.stationsByUserId().get(this.userId()) ?? []);
 
   ngOnInit(): void {
     this.route.params.subscribe((params) => {
@@ -653,6 +691,14 @@ export class DriverProfileComponent implements OnInit {
       next: (l) => { this.licenses.set(l); this.licensesLoading.set(false); },
       error: () => { this.licenses.set([]); this.licensesLoading.set(false); },
     });
+  }
+
+  stationTypeLabel(type: number): string {
+    return STATION_TYPE_LABELS[type as StationType] ?? 'Unknown';
+  }
+
+  stationSubtypeLabel(subType: number): string {
+    return STATION_SUBTYPE_LABELS[subType as StationSubType] ?? 'Unknown';
   }
 
   formatDate(d: string): string {
